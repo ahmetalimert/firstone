@@ -1,0 +1,1029 @@
+<title>Geotech Ground Truth</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one mobile-first reading column; the home screen is a borehole log where each module is a stratum and each lesson is 1 m of depth. */
+:root {
+  --bg: #e9ece6;
+  --surface: #f6f7f3;
+  --surface2: #dfe4dc;
+  --ink: #1b2320;
+  --muted: #56625d;
+  --line: #c4ccc2;
+  --accent: #1d5a75;      /* groundwater */
+  --accent-ink: #f3f8fa;
+  --ochre: #9a6a1c;       /* sand */
+  --ochre-soft: #efe0bf;
+  --good: #2b6e45;
+  --good-soft: #d5e8da;
+  --bad: #9c3b22;
+  --bad-soft: #f2d9d0;
+  --s-fill: #8d8478; --s-clay: #6f7f8c; --s-sand: #c9a35a; --s-silt: #a39a7c; --s-gravel: #9b8c6e;
+  --s-chalk: #c7c6bb; --s-mud: #7b6b5e; --s-rock: #6d7378; --s-rock2: #5a6270; --s-rock3: #4b5560;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --nav-h: 60px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121816; --surface: #1a2220; --surface2: #222c29; --ink: #e3e9e5; --muted: #9aa8a2; --line: #33403c;
+    --accent: #6cb3d1; --accent-ink: #0d1a20; --ochre: #d9a84f; --ochre-soft: #3a3020;
+    --good: #6cc391; --good-soft: #1e3427; --bad: #e98a6e; --bad-soft: #3d2219;
+    --s-fill: #776f64; --s-clay: #5d6e7b; --s-sand: #a9873f; --s-silt: #857d61; --s-gravel: #807256;
+    --s-chalk: #8f8e84; --s-mud: #66574b; --s-rock: #5d6469; --s-rock2: #4d5563; --s-rock3: #414b56;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121816; --surface: #1a2220; --surface2: #222c29; --ink: #e3e9e5; --muted: #9aa8a2; --line: #33403c;
+  --accent: #6cb3d1; --accent-ink: #0d1a20; --ochre: #d9a84f; --ochre-soft: #3a3020;
+  --good: #6cc391; --good-soft: #1e3427; --bad: #e98a6e; --bad-soft: #3d2219;
+  --s-fill: #776f64; --s-clay: #5d6e7b; --s-sand: #a9873f; --s-silt: #857d61; --s-gravel: #807256;
+  --s-chalk: #8f8e84; --s-mud: #66574b; --s-rock: #5d6469; --s-rock2: #4d5563; --s-rock3: #414b56;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 17px; line-height: 1.55; -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+a { color: var(--accent); text-underline-offset: 2px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.1; margin: 0; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px; display: flex; align-items: center; gap: 12px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase; background: none; border: 0; padding: 0; cursor: pointer; }
+.brand span { color: var(--accent); }
+.gauge { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gauge-bar { width: 64px; height: 8px; background: var(--surface2); border: 1px solid var(--line); position: relative; overflow: hidden; }
+.gauge-bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+
+main { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px calc(var(--nav-h) + 32px + env(safe-area-inset-bottom, 0px)); }
+.stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+.nav-in { max-width: 760px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--nav-h); }
+.nav button { background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: var(--display); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.nav button[aria-current="page"] { color: var(--accent); }
+.nav svg { width: 22px; height: 22px; }
+
+.eyebrow { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 18px; color: var(--ink); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+.hero h1 { font-size: 34px; font-weight: 700; letter-spacing: .01em; }
+.hero p { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); padding: 10px 16px; font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; border-radius: 3px; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.done { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+
+.resume { background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; border-radius: 3px; }
+.resume .txt { flex: 1 1 220px; min-width: 0; }
+.resume h3 { font-size: 22px; }
+
+.search { width: 100%; padding: 11px 14px; font: inherit; font-size: 16px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 3px; }
+
+/* Borehole log */
+.log { border: 1px solid var(--line); background: var(--surface); border-radius: 3px; overflow: hidden; }
+.log-head { display: grid; grid-template-columns: 58px 46px 1fr; font-family: var(--display); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); background: var(--surface2); }
+.log-head div { padding: 6px 8px; }
+.stratum { display: grid; grid-template-columns: 58px 46px 1fr; border-bottom: 1px solid var(--line); cursor: pointer; background: none; border-left: 0; border-right: 0; border-top: 0; width: 100%; text-align: left; padding: 0; }
+.stratum:last-child { border-bottom: 0; }
+.stratum:hover .s-desc h3 { color: var(--accent); }
+.s-depth { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 8px 6px; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.s-col { position: relative; border-right: 1px solid var(--line); min-height: 84px; }
+.s-col .pat { position: absolute; inset: 0; opacity: .28; }
+.s-col .pat.fillpart { opacity: 1; inset: 0 0 auto 0; }
+.s-desc { padding: 10px 12px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.s-desc h3 { font-size: 21px; font-weight: 600; }
+.s-desc p { margin: 0; font-size: 14.5px; color: var(--muted); }
+.s-meta { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+.p-fill { background-color: var(--s-fill); background-image: repeating-linear-gradient(45deg, transparent 0 6px, rgba(0,0,0,.28) 6px 7px), repeating-linear-gradient(-45deg, transparent 0 9px, rgba(255,255,255,.18) 9px 10px); }
+.p-clay { background-color: var(--s-clay); background-image: repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,.35) 7px 8px); }
+.p-sand { background-color: var(--s-sand); background-image: radial-gradient(rgba(0,0,0,.4) 1px, transparent 1.4px); background-size: 6px 6px; }
+.p-silt { background-color: var(--s-silt); background-image: repeating-linear-gradient(0deg, transparent 0 8px, rgba(0,0,0,.3) 8px 9px), radial-gradient(rgba(0,0,0,.35) 1px, transparent 1.4px); background-size: auto, 8px 8px; }
+.p-gravel { background-color: var(--s-gravel); background-image: radial-gradient(circle, transparent 3px, rgba(0,0,0,.4) 3.2px, rgba(0,0,0,.4) 4px, transparent 4.3px); background-size: 13px 11px; }
+.p-mud { background-color: var(--s-mud); background-image: repeating-linear-gradient(0deg, transparent 0 4px, rgba(0,0,0,.3) 4px 5px), repeating-linear-gradient(90deg, transparent 0 10px, rgba(255,255,255,.12) 10px 14px); }
+.p-chalk { background-color: var(--s-chalk); background-image: repeating-linear-gradient(0deg, transparent 0 10px, rgba(0,0,0,.25) 10px 11px), repeating-linear-gradient(90deg, transparent 0 16px, rgba(0,0,0,.25) 16px 17px); }
+.p-rock { background-color: var(--s-rock); background-image: linear-gradient(rgba(0,0,0,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.35) 1px, transparent 1px); background-size: 18px 10px; }
+.p-rock2 { background-color: var(--s-rock2); background-image: repeating-linear-gradient(60deg, transparent 0 8px, rgba(0,0,0,.35) 8px 9px), repeating-linear-gradient(-30deg, transparent 0 12px, rgba(255,255,255,.12) 12px 13px); }
+.p-rock3 { background-color: var(--s-rock3); background-image: repeating-linear-gradient(135deg, transparent 0 5px, rgba(0,0,0,.3) 5px 6px), repeating-linear-gradient(45deg, transparent 0 5px, rgba(0,0,0,.3) 5px 6px); }
+
+/* Module view */
+.mod-head { display: grid; grid-template-columns: 14px 1fr; gap: 14px; }
+.mod-head .bar { border-radius: 2px; }
+.mod-head h1 { font-size: 32px; }
+.lesson-list { display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--surface); border-radius: 3px; }
+.lrow { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; width: 100%; }
+.lrow:last-child { border-bottom: 0; }
+.lrow .num { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lrow .t { font-weight: 600; min-width: 0; }
+.lrow .t small { display: block; font-weight: 400; color: var(--muted); font-size: 14px; }
+.tick { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; color: transparent; }
+.tick.on { background: var(--good); border-color: var(--good); color: var(--bg); }
+.tick svg { width: 14px; height: 14px; }
+
+/* Lesson */
+.crumb { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); font-family: var(--display); font-size: 14px; letter-spacing: .1em; text-transform: uppercase; text-align: left; }
+.lesson h1 { font-size: 34px; font-weight: 700; }
+.meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.prose { max-width: 66ch; }
+.prose p { margin: 0 0 12px; }
+.prose ul { margin: 0 0 12px; padding-left: 20px; }
+.prose li { margin-bottom: 6px; }
+.prose b { font-weight: 700; }
+.section-label { font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.keys { border: 1px solid var(--line); background: var(--surface); border-radius: 3px; overflow: hidden; }
+.keys .section-label { padding: 8px 14px; margin: 0; background: var(--surface2); border-bottom: 1px solid var(--line); }
+.keys ul { list-style: none; margin: 0; padding: 0; }
+.keys li { font-family: var(--mono); font-size: 13.5px; line-height: 1.5; padding: 9px 14px; border-bottom: 1px dashed var(--line); overflow-x: auto; }
+.keys li:last-child { border-bottom: 0; }
+.case { border: 1px solid var(--ochre); background: var(--ochre-soft); padding: 14px 16px; border-radius: 3px; }
+.case .tag { display: inline-block; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ochre); border: 1px solid var(--ochre); padding: 1px 7px; border-radius: 2px; margin-bottom: 6px; }
+.case h3 { font-size: 22px; margin-bottom: 6px; }
+.case p { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 999px; font-size: 14.5px; cursor: pointer; text-align: left; display: inline-flex; gap: 6px; align-items: baseline; }
+.chip .n { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.srcs { margin: 0; padding-left: 18px; font-size: 15px; }
+.srcs li { margin-bottom: 4px; }
+
+.q { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; border-radius: 3px; display: flex; flex-direction: column; gap: 10px; }
+.q .qt { font-weight: 600; }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { text-align: left; border: 1px solid var(--line); background: var(--bg); padding: 10px 12px; border-radius: 3px; cursor: pointer; font-size: 16px; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.why { font-size: 15px; color: var(--ink); border-top: 1px dashed var(--line); padding-top: 10px; }
+
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pager button { border: 1px solid var(--line); background: var(--surface); padding: 10px 12px; text-align: left; cursor: pointer; border-radius: 3px; min-width: 0; }
+.pager button:last-child { text-align: right; }
+.pager small { display: block; font-family: var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-size: 12px; }
+.pager span { display: block; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pager button:disabled { visibility: hidden; }
+
+/* Threads */
+.thread { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; border-radius: 3px; cursor: pointer; text-align: left; width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.thread h3 { font-size: 22px; }
+.thread p { margin: 0; color: var(--muted); font-size: 15px; }
+.steps { list-style: none; margin: 0; padding: 0; position: relative; }
+.steps::before { content: ""; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+.steps li { position: relative; padding: 0 0 18px 40px; }
+.steps li .dot { position: absolute; left: 6px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.steps li .dot.on { background: var(--accent); }
+.steps .stitle { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; font-weight: 700; color: var(--accent); font-size: 17px; }
+.steps p { margin: 2px 0 0; font-size: 15px; color: var(--muted); }
+
+/* Quiz */
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; border-radius: 999px; cursor: pointer; font-size: 14.5px; }
+.seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.score { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+select.sel { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 3px; max-width: 100%; }
+
+.srcgroup h2 { font-size: 22px; margin-bottom: 8px; }
+.srcgroup ul { margin: 0; padding-left: 18px; }
+.srcgroup li { margin-bottom: 6px; }
+.note { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.empty { color: var(--muted); padding: 12px 0; }
+
+@media (min-width: 640px) {
+  .hero h1, .lesson h1 { font-size: 42px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .view { animation: rise .18s ease-out; }
+  @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+}
+</style>
+
+<header class="top"><div class="top-in">
+  <button class="brand" id="brand" type="button">Ground <span>Truth</span></button>
+  <div class="gauge" aria-label="Progress"><span id="gaugeTxt">0.0 m</span><div class="gauge-bar"><i id="gaugeBar" style="width:0%"></i></div></div>
+</div></header>
+
+<main id="app"></main>
+
+<nav class="nav" aria-label="Sections"><div class="nav-in">
+  <button type="button" data-nav="home" id="nav-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="2.5" width="8" height="19" rx="1"/><path d="M8 8h8M8 13h8M8 17.5h8"/></svg>Learn</button>
+  <button type="button" data-nav="threads" id="nav-threads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M7 7.2l3.6 8.8M17 7.2l-3.6 8.8M7.2 6h9.6"/></svg>Threads</button>
+  <button type="button" data-nav="quiz" id="nav-quiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 1 1 3.6 2.4c-.7.3-1.1.9-1.1 1.6v.7M12 17.2v.3"/></svg>Quiz</button>
+  <button type="button" data-nav="sources" id="nav-sources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4.5h6a2 2 0 0 1 2 2V20a1.6 1.6 0 0 0-1.6-1.6H4zM20 4.5h-6a2 2 0 0 0-2 2V20a1.6 1.6 0 0 1 1.6-1.6H20z"/></svg>Sources</button>
+</div></nav>
+
+<script>
+/* ---------- Sources ---------- */
+const SRC = {
+  fhwaLib: ["FHWA Geotechnical library: GECs and NHI manuals (free)", "https://www.fhwa.dot.gov/engineering/Geotech/library_listing.cfm", "Hubs"],
+  rosap: ["USDOT ROSA P repository (FHWA PDF mirror)", "https://rosap.ntl.bts.gov/", "Hubs"],
+  issmge: ["ISSMGE Online Library (open-access proceedings)", "https://www.issmge.org/publications/online-library", "Hubs"],
+  ita: ["ITA-AITES Working Group publications", "https://about.ita-aites.org/publications/wg-publications", "Tunnels"],
+  hoek: ["Hoek, Practical Rock Engineering (Rocscience, free)", "https://www.rocscience.com/learning/hoeks-corner", "Rock"],
+  hoekLib: ["Hoek's Corner rock mechanics reference library", "https://www.rocscience.com/learning/hoeks-corner-rock-mechanics-reference-library", "Rock"],
+  mit1361: ["MIT OCW 1.361 Advanced Soil Mechanics (Ladd)", "https://ocw.mit.edu/courses/1-361-advanced-soil-mechanics-fall-2004/", "Soil"],
+  mit1322: ["MIT OCW 1.322 Soil Behavior", "https://ocw.mit.edu/courses/1-322-soil-behavior-spring-2005/", "Soil"],
+  nptel: ["NPTEL soil mechanics and foundation courses (IIT)", "https://onlinecourses.nptel.ac.in/", "Soil"],
+  sf: ["FHWA Soils & Foundations Reference Manual Vol. I/II (NHI-06-088/089), via FHWA library", "https://www.fhwa.dot.gov/engineering/Geotech/library_listing.cfm", "Foundations"],
+  gec10: ["FHWA GEC 10 Drilled Shafts (2018), via FHWA library", "https://www.fhwa.dot.gov/engineering/Geotech/library_listing.cfm", "Foundations"],
+  gec12: ["FHWA GEC 12 Driven Piles (2016), via FHWA library", "https://www.fhwa.dot.gov/engineering/Geotech/library_listing.cfm", "Foundations"],
+  gec13: ["FHWA GEC 13 Ground Modification Methods (2017), via FHWA library", "https://www.fhwa.dot.gov/engineering/Geotech/library_listing.cfm", "Ground improvement"],
+  em1904: ["USACE EM 1110-1-1904 Settlement Analysis", "https://damtoolbox.org/wiki/Settlement_Analysis_(EM_1110-1-1904)", "Foundations"],
+  usace: ["USACE Engineering Manuals (publications portal)", "https://www.publications.usace.army.mil/", "Hubs"],
+  c760: ["CIRIA C760 embedded retaining walls: free EA summary", "https://assets.publishing.service.gov.uk/media/6038c965d3bf7f03985e129a/Guidance_on_embedded_retaining_wall_design_-_summary.pdf", "Excavations"],
+  em2504: ["USACE EM 1110-2-2504 Design of Sheet Pile Walls", "https://apps.dtic.mil/sti/pdfs/ADA402989.pdf", "Excavations"],
+  tunnel: ["FHWA Road Tunnel Manual: Civil Elements (cut-and-cover, mined, bored, immersed)", "https://www.fhwa.dot.gov/bridge/tunnel/pubs/nhi09010/tunnel_manual.pdf", "Tunnels"],
+  crossrail: ["Crossrail Learning Legacy (case studies)", "https://learninglegacy.crossrail.co.uk/", "Tunnels"],
+  gbr: ["ASCE MOP 154 Geotechnical Baseline Reports (2022)", "https://ascelibrary.com/doi/book/10.1061/9780784416082", "Tunnels"],
+  ec7: ["The second generation of Eurocode 7 (Univ. Stuttgart / DFI-EFFC 2025)", "https://www.igs.uni-stuttgart.de/institut/publikationen/Publikationen/2025/DFIEFFC25-210-THE_SECOND_GENERATION_OF_EUROCODE_7-250510_final.pdf", "Codes"],
+  ec7lnec: ["EC7 2nd generation paper series (LNEC)", "https://repositorio.lnec.pt/bitstream/123456789/1017707/2/2023-EC7_REP_paper1-geomechanics_and_tunnelling.pdf", "Codes"],
+  ec7ret: ["ISSMGE: 2nd gen EC7, retaining structures and anchors", "https://www.issmge.org/publications/publication/2nd-generation-of-eurocode-7-retaining-the-ground-en-1997-3-7-retaining-structures-and-en-1997-3-8-anchors", "Codes"],
+  jrc: ["JRC Eurocodes technical reports (reliability, representative values)", "https://eurocodes.jrc.ec.europa.eu/", "Codes"],
+  cedd: ["Hong Kong GEO / CEDD publications (Geoguides, free)", "https://www.cedd.gov.hk/eng/publications/how-to-get-them/index.html", "Hubs"],
+  caltrans: ["Caltrans Geotechnical Manual", "https://dot.ca.gov/programs/engineering-services/manuals/geotechnical-manual", "Ground improvement"],
+  repo: ["Full source library in your repo (SOURCES.md)", "https://github.com/ahmetalimert/firstone/blob/ccr-e8c510ea-66cc9h/geotech/SOURCES.md", "Hubs"]
+};
+
+/* ---------- Curriculum ---------- */
+const M = [
+{ id: 1, t: "Ground & site investigation", pat: "p-fill", blurb: "Geology, investigation planning, in-situ and lab testing, groundwater.", L: [
+ { id: "1-1", t: "Geology first: from geological model to design model", min: 6,
+   lead: "Every geotechnical decision starts with how the ground formed. Its origin controls layering, stress history and variability.",
+   body: `<p>Soil origin predicts behaviour before you test anything. <b>Marine clays</b> are often soft, normally consolidated and sensitive. <b>Glacial tills</b> are dense and contain boulders, and they vary a lot over short distances. <b>Alluvium</b> is interbedded, with sand lenses that drain clay layers. <b>Residual soils</b> grade into weathered rock. <b>Fill</b> is unpredictable.</p>
+<p>Practice works with three models (second-generation Eurocode 7 makes them explicit):</p>
+<ul><li><b>Geological model</b>: what is there and why.</li><li><b>Ground model</b>: geometry of units, groundwater, and parameter ranges.</li><li><b>Geotechnical design model</b>: a simplified version for one limit state and one structure.</li></ul>
+<p><b>Stress history:</b> erosion removes overburden, so near-surface clays become overconsolidated (OCR well above 1) and K0 can exceed 1. This affects wall pressures and tunnel lining loads.</p>
+<p><b>Geological hazards:</b> buried channels, karst in chalk and limestone, faults, boulders, gas, contamination, old foundations and other man-made obstructions.</p>`,
+   keys: ["OCR = σ′p / σ′v0", "K0 (heavily OC clay) can be > 1 near the surface"],
+   ex: { k: "Real case", t: "London's layered ground", b: "A typical central London profile: made ground, Thames gravels (water-bearing), London Clay (stiff, fissured, heavily overconsolidated), the Lambeth Group (variable clays and sands, with water-bearing sand channels), Thanet Sand, then the Chalk aquifer. Crossrail and Tideway kept their tunnels in London Clay where possible because it is stiff and has low permeability. Many of the surprises came from sand lenses in the Lambeth Group." },
+   links: ["1-2", "1-5", "2-1", "9-3"], src: ["crossrail", "sf", "mit1361"],
+   q: [{ q: "Why is London Clay heavily overconsolidated near the surface?", o: ["Cementation by chalk", "Erosion removed overlying sediment", "Freezing during glaciation", "Pile installation"], a: 1, w: "The overlying sediments were eroded away. The clay 'remembers' the higher stress it once carried, so σ′p is much larger than today's σ′v0." }] },
+ { id: "1-2", t: "Planning a site investigation", min: 7,
+   lead: "A good investigation is phased. Each phase answers the questions raised by the one before.",
+   body: `<p><b>Phases:</b> desk study (geological and historical maps, previous boreholes, utilities, unexploded ordnance, contamination, mining) → walkover → preliminary investigation → main investigation → supplementary and verification work during construction.</p>
+<p><b>Goals:</b> identify every ground unit and its geometry, the groundwater regime, and the parameters each limit state needs. Find the hazards, especially those that change construction methods.</p>
+<p><b>Spacing and depth</b> depend on variability and structure type. Buildings often use a 15–40 m grid. Linear works use 50–200 m, with extra holes at shafts, portals and stations.</p>
+<p><b>Reports:</b> the <b>GDR</b> (factual data), the <b>GIR</b> (interpretation) and the <b>GBR</b> (contractual baselines for tunnels and excavations).</p>`,
+   keys: ["Footings: investigate 1.5–2B below founding level", "Piles: ≥ 5D (or ~3 m) below the toe", "Tunnels: at least one diameter below the invert", "USNCTT (1984): aim for ~3% of construction cost and ~1.5 m of boring per metre of tunnel"],
+   ex: { k: "Real case", t: "The US tunnelling investigation study", b: "The US National Committee on Tunneling Technology (1984) reviewed completed tunnel projects. More investigation correlated with fewer claims and smaller cost overruns. It recommended budgeting about 3% of estimated construction cost for investigation and about 1.5 m of borehole per metre of tunnel. These are still common benchmarks." },
+   links: ["1-3", "1-4", "7-6", "9-1"], src: ["fhwaLib", "ita", "cedd"],
+   q: [{ q: "Which document sets contractual baselines for ground conditions?", o: ["Geotechnical Data Report", "Geotechnical Interpretive Report", "Geotechnical Baseline Report", "Desk study"], a: 2, w: "The GBR states the baselines. Conditions materially worse than the baselines are the owner's risk under a differing site conditions clause." }] },
+ { id: "1-3", t: "In-situ testing: SPT, CPTu and friends", min: 8,
+   lead: "In-situ tests measure the ground at its real stress level, without the disturbance of sampling.",
+   body: `<p><b>SPT:</b> a 63.5 kg hammer falls 760 mm. N is the blow count for 300 mm of penetration after 150 mm of seating. It is robust in sands and gravels but crude in clays. Correct it for energy and overburden.</p>
+<p><b>CPTu:</b> a 10 cm² cone is pushed at 20 mm/s, measuring tip resistance qc, sleeve friction fs and pore pressure u2. It gives a continuous profile, picks out thin layers and estimates soil behaviour type (Ic). Dissipation tests give the consolidation coefficient. A <b>seismic cone</b> adds shear-wave velocity Vs, which gives G0.</p>
+<p><b>Other tests:</b></p>
+<ul><li><b>DMT:</b> horizontal stress and OCR.</li><li><b>Pressuremeter (PMT):</b> stiffness and limit pressure, useful for laterally loaded piles.</li><li><b>Field vane:</b> su in soft clay, with Bjerrum's correction.</li><li><b>Packer and pumping tests:</b> permeability.</li><li><b>Geophysics</b> (MASW, ERT, refraction): fills the gaps between boreholes.</li></ul>`,
+   keys: ["N60 = N · ER / 60 ; (N1)60 = CN · N60, CN ≈ (pa/σ′v)^0.5 ≤ 1.7", "qt = qc + u2(1 − a)", "su = (qt − σv0) / Nkt, Nkt ≈ 10–20", "G0 = ρ · Vs²", "Ic > ~2.6 → clay-like behaviour"],
+   ex: { k: "Real case", t: "Christchurch and the CPT database", b: "After the 2010–11 Canterbury earthquakes, tens of thousands of CPTs were used to map liquefaction for the rebuild. They were shared in the New Zealand Geotechnical Database, which showed how much value pooled investigation data has." },
+   links: ["1-4", "2-5", "4-2", "10-1"], src: ["fhwaLib", "issmge", "nptel"],
+   q: [{ q: "Why is qc corrected to qt?", o: ["To remove sleeve friction", "Pore pressure acts on unequal areas behind the cone tip", "To correct for hammer energy", "To account for rod length"], a: 1, w: "Water pressure acts on the shoulder area behind the tip (area ratio a). This matters most in soft clays, where u2 is large." }] },
+ { id: "1-4", t: "Lab tests and choosing design parameters", min: 7,
+   lead: "Lab tests give you numbers. Engineering judgement turns those numbers into design values.",
+   body: `<p><b>Oedometer:</b> σ′p, Cc, Cr, cv and Cα. <b>Triaxial:</b> UU tests give a quick su but are sensitive to sample disturbance. CIU and CK0U tests with pore-pressure measurement give effective strength and undrained strength. CD tests give drained parameters. <b>Ring shear</b> gives residual strength. Classification tests (particle size distribution, Atterberg limits) support everything else.</p>
+<p><b>Sample disturbance</b> lowers measured σ′p and su and blurs the yield point. Block samples are best and thin-walled piston samples are good. Driven tubes in soft clay are poor.</p>
+<p><b>Selecting parameters:</b> plot all results against depth together with CPT correlations, and define the units. Then choose a characteristic value: a <b>cautious estimate of the value affecting the limit state</b>. Consider how much ground is involved. A slip surface averages strength over its length; a pile toe depends on local strength.</p>`,
+   keys: ["Sample quality (Lunne et al. 1997): Δe/e0 < 0.04 → very good to excellent (OCR 1–2)", "UU strength in soft clay often < in-situ su because of disturbance"],
+   ex: { k: "Real case", t: "Why SHANSEP exists", b: "Ladd & Foott (1974) developed SHANSEP because disturbed UU strengths of soft Boston Blue Clay were unreliable. Specimens are reconsolidated beyond the in-situ stress, and the normalised behaviour su/σ′v is used with the stress history. MIT 1.361 covers this in depth." },
+   links: ["2-3", "2-2", "9-2", "1-3"], src: ["mit1361", "sf"],
+   q: [{ q: "What does sample disturbance typically do to oedometer results?", o: ["Raises σ′p", "Lowers σ′p and blurs the yield point", "Has no effect on clays", "Increases Cc"], a: 1, w: "Disturbance destroys structure. The curve becomes rounded and σ′p is underestimated, so overconsolidation is underestimated too." }] },
+ { id: "1-5", t: "Groundwater", min: 6,
+   lead: "Most geotechnical problems are water problems. Pore pressures are often not simply hydrostatic.",
+   body: `<p><b>Profiles:</b> hydrostatic; <b>perched</b> water above a low-permeability layer; <b>under-drained</b>, with downward flow to a pumped aquifer, so pore pressure is below hydrostatic; <b>artesian</b>, where a confined aquifer's head sits above the excavation base or ground level.</p>
+<p><b>Measurement:</b> use standpipes in permeable soils and grouted-in vibrating-wire piezometers in clays, where response time matters. Install several levels and record seasonal and tidal variation.</p>
+<p><b>Design consequences:</b> effective stress and strength, uplift on base slabs, base stability of excavations, seepage forces, dewatering settlement, and the choice of tunnel method (TBM type, compressed air).</p>
+<p><b>Long-term change:</b> abstraction stopping, climate, and leaking mains.</p>`,
+   keys: ["u = γw · hw (hydrostatic)", "Uplift check: stabilising weight vs water pressure under the slab or clay plug"],
+   ex: { k: "Real case", t: "London's rising groundwater", b: "Heavy pumping from the Chalk aquifer in the 19th–20th centuries lowered groundwater far below its natural level and under-drained the London Clay. When industrial pumping declined, groundwater rose substantially, threatening basements and tunnels. The GARDIT strategy now controls abstraction to manage the rise." },
+   links: ["2-1", "5-5", "6-2", "7-2"], src: ["sf", "c760"],
+   q: [{ q: "Which piezometer is preferred in low-permeability clay?", o: ["Open standpipe", "Grouted-in vibrating-wire piezometer", "Observation well with gravel pack", "None, clays have no pore pressure"], a: 1, w: "A standpipe needs a large volume of water to flow in, so it responds slowly in clay. Vibrating-wire piezometers respond almost instantly." }] }
+]},
+{ id: 2, t: "Soil behaviour & strength", pat: "p-clay", blurb: "Effective stress, consolidation, shear strength, critical state, stiffness.", L: [
+ { id: "2-1", t: "Effective stress and drainage", min: 7,
+   lead: "σ′ = σ − u controls strength and volume change. Drainage decides how fast u changes.",
+   body: `<p>When load is applied, the pore water first takes a share. As water drains, the load transfers to the soil skeleton. <b>Undrained</b> means loading is faster than drainage, so volume stays constant and excess pore pressure develops (clays; also sands in earthquakes). <b>Drained</b> means excess pore pressure has dissipated.</p>
+<p>Drainage time scales with (drainage path)² / cv. A clay layer may take decades; a sand takes minutes.</p>
+<p><b>Two classic opposites:</b></p>
+<ul><li><b>Embankment on soft clay:</b> loading raises u, so the factor of safety is lowest at the end of construction and improves as the clay consolidates. Short-term undrained stability is critical.</li><li><b>Cutting or excavation in clay:</b> unloading lowers u (suction), so strength is temporarily higher. As pore pressures equilibrate, strength falls. Long-term drained stability is critical.</li></ul>`,
+   keys: ["σ′ = σ − u", "t = Tv · Hdr² / cv ; T50 = 0.197, T90 = 0.848", "Example: cv = 1 m²/yr, Hdr = 5 m → t90 ≈ 21 years"],
+   ex: { k: "Real case", t: "Delayed failures of London Clay cuttings", b: "Skempton (1977) studied railway cuttings in London Clay that failed decades after excavation. Negative pore pressures from unloading slowly dissipated, and strength fell toward the fully softened value. This is the textbook proof that long-term drained conditions govern cuts in clay." },
+   links: ["2-2", "2-3", "5-4", "7-2"], src: ["mit1361", "sf"],
+   q: [{ q: "For a new cutting in stiff clay, which condition is usually critical?", o: ["End of construction (undrained)", "Long-term (drained)", "Both equal", "Neither: clays don't fail"], a: 1, w: "Unloading creates suction, so strength is temporarily higher. It drops as pore pressures rise toward equilibrium." }] },
+ { id: "2-2", t: "Consolidation and settlement", min: 7,
+   lead: "Settlement magnitude comes from the compression curve. Settlement time comes from cv and the drainage path.",
+   body: `<p><b>Primary consolidation</b> is water leaving as excess u dissipates. On the e–log σ′ curve, the soil follows the recompression index Cr up to σ′p, then the compression index Cc beyond it. The same load causes far more settlement in a normally consolidated clay than in an overconsolidated one.</p>
+<p><b>Rate:</b> field cv is often higher than lab values because of sand lenses and fabric. With vertical drains, horizontal ch governs.</p>
+<p><b>Secondary compression (creep)</b> continues after primary consolidation and matters most in organic soils and peat.</p>
+<p><b>Speeding it up:</b> preload or surcharge, plus prefabricated vertical drains (PVDs). Drains shorten the drainage path to roughly half the drain spacing, with radial flow (Barron/Hansbo theory).</p>`,
+   keys: ["s = [Cr·log(σ′p/σ′0) + Cc·log(σ′f/σ′p)] · H/(1+e0)", "Cα/Cc ≈ 0.04 ± 0.01 for inorganic clays (Mesri)", "mv = Δε / Δσ′"],
+   ex: { k: "Real case", t: "Kansai International Airport", b: "Kansai Airport (Osaka Bay, opened 1994) is on a reclaimed island over thick soft Holocene clay and deeper Pleistocene clays. Sand drains treated the upper clay. The deep Pleistocene clays kept consolidating, and settlement reached many metres, well beyond early predictions. The terminal building has jackable columns so differential settlement can be corrected." },
+   links: ["2-1", "3-2", "10-2", "1-4"], src: ["em1904", "mit1361", "gec13"],
+   q: [{ q: "How do prefabricated vertical drains speed up consolidation?", o: ["They increase cv of the clay", "They shorten the drainage path", "They reduce the load", "They remove secondary compression"], a: 1, w: "Time scales with the square of the drainage path. Drains at 1–2 m spacing cut that path from metres to below a metre." }] },
+ { id: "2-3", t: "Shear strength: drained and undrained", min: 8,
+   lead: "Drained strength is a property of the material. Undrained strength su depends on stress path, rate and stress history.",
+   body: `<p><b>Effective stress:</b> τ = c′ + σ′ tan φ′. For sands and normally consolidated clays, c′ ≈ 0 at critical state. Apparent c′ in overconsolidated clays comes from dilation at peak, so be cautious about relying on it.</p>
+<p><b>Undrained strength su</b> is a total-stress parameter. It depends on the mode of shear: compression > simple shear > extension (anisotropy). For a given clay it scales with stress history.</p>
+<p><b>Peak → critical → residual:</b> brittle soils lose strength after peak, which leads to progressive failure. In high-plasticity clays, large displacements align the platy particles and strength falls to residual. Old landslides therefore reactivate at residual strength.</p>
+<p><b>Matching tests to the field:</b> triaxial compression ≈ under a footing or behind a wall; extension ≈ passive zone and base heave; direct simple shear ≈ horizontal parts of a slip surface.</p>`,
+   keys: ["τf = c′ + σ′n tan φ′", "su/σ′v = S · OCR^m (SHANSEP), S ≈ 0.22, m ≈ 0.8", "φ′r ≈ 8–20° for high-plasticity clays", "Skempton A: dense/OC soils < 0; loose/NC soils ≈ 0.5–1"],
+   ex: { k: "Real case", t: "Carsington Dam, 1984", b: "Carsington Dam in England failed during construction. Skempton & Vaughan (1993) showed a progressive failure through a pre-sheared foundation clay and a brittle core. Peak strengths could not be mobilised everywhere at once, so the design was unsafe even though the peak parameters looked adequate." },
+   links: ["2-4", "3-1", "5-1", "9-4"], src: ["mit1361", "mit1322"],
+   q: [{ q: "Which lab test best represents the passive zone below an excavation base?", o: ["Triaxial compression", "Triaxial extension", "Oedometer", "UU test"], a: 1, w: "In the passive zone the vertical stress decreases and the horizontal stress becomes the major principal stress. That matches extension, which usually gives a lower su than compression." }] },
+ { id: "2-4", t: "Critical state and dilatancy", min: 7,
+   lead: "Whether a soil contracts or dilates depends on its state relative to the critical state line.",
+   body: `<p>Soils sheared far enough reach a <b>critical state</b>: shearing continues at constant volume and constant stress ratio q/p′ = M. The state lies on the critical state line (CSL) in e–ln p′ space.</p>
+<p><b>State parameter</b> ψ = e − e_cs:</p>
+<ul><li><b>Loose (ψ > 0)</b> contracts. Drained, the volume decreases. Undrained, pore pressure rises and strength drops, which can lead to <b>static liquefaction</b>.</li><li><b>Dense (ψ &lt; 0)</b> dilates. Peak strength exceeds critical. Undrained, negative pore pressure gives a temporary strength gain.</li></ul>
+<p>Design lesson: don't rely on peak strength where strains will be large. Treat loose saturated fills and tailings with great respect.</p>`,
+   keys: ["M = 6 sin φ′cs / (3 − sin φ′cs) (triaxial compression)", "Bolton (1986): φ′peak − φ′cs ≈ 3·IR, IR = ID(10 − ln p′) − 1", "ψ = e − e_cs"],
+   ex: { k: "Real case", t: "Fundão tailings dam, Brazil, 2015", b: "The investigation panel found flow liquefaction of loose, saturated, contractive sandy tailings. It was triggered by lateral extrusion of the weaker slimes beneath. The failure killed 19 people and caused major river pollution. It is a textbook case of contractive behaviour." },
+   links: ["2-3", "10-1", "4-2"], src: ["mit1322", "issmge"],
+   q: [{ q: "A loose saturated sand is sheared undrained. What happens?", o: ["Negative pore pressure, strength gain", "Positive pore pressure, strength loss", "No pore pressure change", "It consolidates"], a: 1, w: "Loose soil wants to contract. Undrained, it cannot, so pore pressure rises, effective stress falls, and strength can drop sharply." }] },
+ { id: "2-5", t: "Stiffness and small strains", min: 7,
+   lead: "Soil stiffness is strongly non-linear. Around most structures, strains are small and the ground is much stiffer than conventional tests suggest.",
+   body: `<p>Stiffness is highest at very small strains (G0, below ~0.001%) and falls as strain increases (the degradation curve G/G0 vs γ). Strains around foundations, walls and tunnels in stiff ground are typically <b>0.01–0.1%</b>.</p>
+<p>Conventional triaxial tests measure strain outside the sample. Seating and bedding errors then underestimate stiffness. Local strain gauges or bender elements fix this.</p>
+<p><b>Field G0</b> comes from shear-wave velocity: seismic CPT, cross-hole tests or MASW.</p>
+<p><b>Why it matters:</b> a linear-elastic model with one E overpredicts far-field movement and underpredicts movement near the structure. Use HS-small or similar models for excavations and tunnels. Stiffness also depends on stress level and recent stress history.</p>`,
+   keys: ["G0 = ρ · Vs²", "E = 2G(1 + ν)", "HS-small: γ0.7 = shear strain where G ≈ 0.72·G0"],
+   ex: { k: "Real case", t: "\"Small is beautiful\" (Burland, 1989)", b: "Burland showed that measured movements around excavations and foundations in London Clay implied small strains and much higher stiffness than routine lab tests gave. Jardine et al. (1984) used local strain gauges on triaxial samples and reconciled lab and field. This work is why modern excavation models use small-strain stiffness." },
+   links: ["1-3", "5-6", "7-3", "9-4"], src: ["mit1322", "issmge"],
+   q: [{ q: "Why do conventional triaxial tests underestimate stiffness?", o: ["Samples are too large", "External strain measurement includes bedding and seating errors", "Lab soil is always stiffer", "Rates are too slow"], a: 1, w: "External displacement includes compliance at the sample ends. At small strains this error dominates. Local gauges measure the sample itself." }] }
+]},
+{ id: 3, t: "Shallow foundations", pat: "p-sand", blurb: "Bearing capacity, settlement, rafts and piled rafts.", L: [
+ { id: "3-1", t: "Bearing capacity", min: 7,
+   lead: "Bearing capacity is the ground's ultimate resistance. It rarely governs alone, but you must check it.",
+   body: `<p><b>Failure modes:</b> general shear (dense or stiff ground), local shear, and punching (loose or soft ground).</p>
+<p><b>General equation</b> (Terzaghi → Meyerhof, Hansen, Vesić) with shape, depth and inclination factors. Use the <b>effective width</b> B′ = B − 2e for eccentric loads, and the buoyant unit weight γ′ where the water table is shallow.</p>
+<p><b>Undrained (short-term) case in clay:</b> q_ult = Nc·su + q.</p>
+<p><b>Drained case</b> for sands and long-term clay.</p>
+<p><b>Layered ground:</b> a strong layer over a weak one can fail by punching through (Meyerhof & Hanna).</p>`,
+   keys: ["q_ult = c′Nc sc dc + q Nq sq dq + ½ γ′ B′ Nγ sγ dγ", "Nq = e^(π tan φ′) tan²(45 + φ′/2) ; Nc = (Nq − 1) cot φ′", "Undrained strip: Nc = π + 2 = 5.14 ; square/circle at surface ≈ 6.2 (Skempton)", "B′ = B − 2e"],
+   ex: { k: "Real case", t: "Transcona Grain Elevator, 1913", b: "On first filling, the elevator's raft on lacustrine clay failed in bearing. The structure tilted about 27° but stayed intact, and was later jacked back onto piles. Peck & Bryant (1953) back-analysed it with measured su and found close agreement with undrained bearing theory. This makes it a classic validation of Nc ≈ 5." },
+   links: ["2-3", "3-2", "9-2"], src: ["sf", "usace"],
+   q: [{ q: "A 2.0 m wide strip footing has load eccentricity e = 0.2 m. What is B′?", o: ["2.2 m", "1.8 m", "1.6 m", "1.0 m"], a: 2, w: "B′ = B − 2e = 2.0 − 0.4 = 1.6 m." }] },
+ { id: "3-2", t: "Settlement and serviceability", min: 7,
+   lead: "For most footings, especially on sand, settlement governs the design rather than bearing capacity.",
+   body: `<p><b>Components:</b> immediate (undrained distortion in clay; elastic in sand), consolidation, and secondary compression.</p>
+<p><b>Methods:</b></p>
+<ul><li>Sands: Schmertmann's strain influence method (CPT-based); Burland & Burbidge (SPT-based).</li><li>Clays: oedometer-based calculations, with the Skempton–Bjerrum correction for 3D conditions.</li></ul>
+<p><b>Criteria:</b> a common traditional limit is 25 mm total settlement for isolated footings on sand (larger for rafts). Angular distortion β is what damages buildings. Use the limits below, but always check the specific structure and its finishes.</p>`,
+   keys: ["β ≈ 1/500: safe limit for buildings", "β ≈ 1/300: cracking of panels and walls", "β ≈ 1/150: structural damage (Skempton & MacDonald 1956; Bjerrum 1963)"],
+   ex: { k: "Real case", t: "Leaning Tower of Pisa", b: "The tower sits on soft, compressible marine clay (Pancone clay) under variable silty layers. Uneven consolidation tilted it about 5.5° by 1990. A committee including John Burland stabilised it: first with lead counterweights, then by extracting soil from under the north side (1999–2001). This reduced the tilt by about half a degree." },
+   links: ["2-2", "2-5", "5-6", "3-3"], src: ["em1904", "sf"],
+   q: [{ q: "What usually governs the design of a spread footing on medium-dense sand?", o: ["Bearing capacity", "Settlement", "Sliding", "Uplift"], a: 1, w: "Sands have high bearing capacity, so the allowable pressure is almost always set by tolerable settlement." }] },
+ { id: "3-3", t: "Rafts, compensation and piled rafts", min: 6,
+   lead: "Rafts spread load and add stiffness. Piled rafts use piles to reduce settlement, not to carry the whole load.",
+   body: `<p><b>Rafts</b> reduce differential settlement and bridge local soft spots.</p>
+<p>A <b>compensated (floating) foundation</b> removes soil weighing about the same as the building, so the net pressure is small. Watch for heave during excavation, uplift on the basement and temporary works.</p>
+<p><b>Piled raft:</b> the raft carries part of the load and the piles act as settlement reducers. The piles may work close to their geotechnical capacity. The design target is total and differential settlement (Poulos; Katzenbach).</p>`,
+   keys: ["q_net = q_applied − γ·D (D = depth of excavation)", "Piled raft load share α_pr = ΣQ_piles / Q_total"],
+   ex: { k: "Real case", t: "Messeturm, Frankfurt", b: "The roughly 256 m Messeturm (1991) stands on a piled raft in overconsolidated Frankfurt Clay. Monitoring showed the piles carried around half the load, and settlements were much smaller than an unpiled raft would have had. It is a reference case for the piled-raft concept." },
+   links: ["4-4", "2-2", "6-1"], src: ["sf", "issmge"],
+   q: [{ q: "A compensated foundation mainly reduces what?", o: ["Pile length", "The net bearing pressure on the soil", "Groundwater level", "Excavation cost"], a: 1, w: "The excavated soil weight offsets the building load, so the net stress change in the ground is small, and so is the settlement." }] }
+]},
+{ id: 4, t: "Deep foundations", pat: "p-silt", blurb: "Pile types, axial capacity, load testing, groups and downdrag.", L: [
+ { id: "4-1", t: "Pile types and construction", min: 6,
+   lead: "How a pile is installed changes the ground around it, so construction method is part of the design.",
+   body: `<p><b>Displacement piles</b> (driven precast, closed steel pipe, screw and displacement auger) densify sand and raise horizontal stress. Driven piles bring noise, vibration and heave of nearby piles.</p>
+<p><b>Replacement piles</b> (bored or drilled shafts, CFA, barrettes) remove soil and relax stress. They suit large loads and diameters without vibration. In unstable or water-bearing ground they need support (casing, bentonite or polymer fluid), base cleaning and tremie concrete.</p>
+<p><b>Micropiles</b> (&lt; 300 mm) suit restricted access, underpinning and rock.</p>
+<p><b>Quality risks:</b> necking, soil inclusions, soft toes, and concrete contaminated by support fluid. For CFA piles, a mismatch between auger withdrawal rate and concrete pressure is a risk, so use instrumented rigs.</p>
+<p><b>Integrity tests:</b> low-strain sonic (PIT), cross-hole sonic logging (CSL), thermal integrity profiling (TIP).</p>`,
+   keys: ["CSL needs access tubes cast into the pile", "PIT: a hammer tap at the head, then reflection analysis"],
+   ex: { k: "In practice", t: "London bored piles", b: "In London Clay, bored piles are often dry-bored with a short casing sealed through the gravels. Where water-bearing Lambeth Group sands are expected, designers switch to support fluid or CFA to avoid collapse and soft toes. This is a good interview example of geology driving pile type." },
+   links: ["4-2", "4-3", "5-2"], src: ["gec10", "gec12"],
+   q: [{ q: "Which test checks concrete quality between access tubes inside a pile?", o: ["PIT", "CSL", "PDA", "SPT"], a: 1, w: "Cross-hole sonic logging sends ultrasonic pulses between tubes. Delays or weak signals show anomalies." }] },
+ { id: "4-2", t: "Axial capacity", min: 8,
+   lead: "Q = Qs + Qb. Shaft and base resistance mobilise at very different displacements.",
+   body: `<p><b>Clays (total stress, α method):</b> shaft friction fs = α·su. α ≈ 1 in soft clay and falls in stiff clay. Base resistance qb ≈ 9·su, reduced for large diameters and fissured clay.</p>
+<p><b>Effective stress (β method):</b> fs = β·σ′v. β ≈ 0.25–0.4 in clays (Burland 1973). In sands β is higher and depends on how the pile was installed.</p>
+<p><b>Sands:</b> base resistance needs large displacement. CPT-based methods (LCPC; ICP-05 and UWA-05 for driven piles) capture friction fatigue.</p>
+<p><b>Time effects:</b> set-up (capacity gain in clay and with ageing in sand) and relaxation.</p>
+<p><b>Mobilisation:</b> the shaft is fully mobilised at about 0.5–1% of D; the base needs about 10% of D. At working load, bored piles carry most load in the shaft.</p>`,
+   keys: ["Q_ult = Σ fs·As + qb·Ab", "α-method: fs = α·su ; β-method: fs = β·σ′v", "Clay base: qb ≈ 9·su", "London Clay bored piles: α ≈ 0.45 (Skempton 1959)"],
+   ex: { k: "Real case", t: "Skempton's α for London Clay", b: "Skempton (1959) back-analysed load tests on bored piles in London Clay and found α ≈ 0.45 (range about 0.3–0.6). He linked the low value to softening of the clay during boring. Load-test data turned into a design rule that is still in use." },
+   links: ["2-3", "1-3", "4-3", "4-4"], src: ["gec10", "gec12", "sf"],
+   q: [{ q: "Why do bored piles at working load rely mainly on shaft resistance?", o: ["The base is always weak", "Shaft resistance mobilises at much smaller displacement", "Codes forbid base resistance", "The base is grouted"], a: 1, w: "The shaft is fully mobilised at about 0.5–1% of D, while the base needs about 10% of D. At working settlements, the shaft does most of the work." }] },
+ { id: "4-3", t: "Load testing and design verification", min: 6,
+   lead: "Load tests replace assumptions with measurements, and codes reward them with lower factors.",
+   body: `<p><b>Static tests:</b> maintained load (MLT) or constant rate of penetration (CRP), reacting against kentledge or anchor piles. Test trial piles to failure before construction, and proof-load working piles during it.</p>
+<p><b>Bi-directional (O-cell):</b> a jack cast inside the pile pushes the upper shaft against the lower shaft and base. No reaction frame is needed, so very large loads are possible. An equivalent top-down curve is derived from the results.</p>
+<p><b>Dynamic tests:</b> PDA with CAPWAP signal matching (driven piles; drop weights for bored piles). Rapid load tests (Statnamic) also exist.</p>
+<p><b>Why test:</b> EC7 correlation factors ξ fall as the number of tests rises, and AASHTO allows higher resistance factors with static tests. Strain gauges or fibre optics separate shaft from base and give t–z curves.</p>`,
+   keys: ["More tests → smaller ξ (EC7) / higher φ (AASHTO)", "Instrumented test → load distribution → t–z / q–z curves"],
+   ex: { k: "In practice", t: "Where kentledge is impossible", b: "Over water, or for piles with capacities of tens of MN, a conventional reaction system is impractical. Bi-directional cells (introduced by Osterberg in the 1980s) are the standard answer, and many major bridges and towers have used them." },
+   links: ["4-2", "9-1", "9-5"], src: ["gec10", "gec12"],
+   q: [{ q: "What provides the reaction in a bi-directional (O-cell) test?", o: ["Kentledge", "Anchor piles", "The pile's own shaft above the cell", "A crane"], a: 2, w: "The jack pushes up against the upper shaft and down against the lower shaft and base." }] },
+ { id: "4-4", t: "Groups, lateral loads and downdrag", min: 7,
+   lead: "Piles rarely act alone. Groups settle more, lateral loads need p–y curves, and settling soil drags piles down.",
+   body: `<p><b>Groups:</b> in clay, check block failure. A group settles more than a single pile because of interaction. Use the equivalent raft at about two-thirds of pile length for friction piles (Tomlinson), or interaction factors (Poulos & Davis).</p>
+<p><b>Lateral loads:</b> short rigid vs long flexible piles (Broms); p–y curves (Matlock for soft clay, Reese for sand) in LPILE; head fixity; p-multipliers for group shadowing.</p>
+<p><b>Downdrag (negative skin friction):</b> when fill, consolidation or dewatering makes the soil settle around the pile, the soil drags the pile down. The <b>neutral plane</b> is where pile and soil settle equally. Downdrag mainly affects settlement and structural load rather than geotechnical capacity (Fellenius).</p>`,
+   keys: ["Equivalent raft at ~2/3 L (friction piles)", "Neutral plane: max axial load in pile; pile settlement = soil settlement"],
+   ex: { k: "Real case", t: "Burj Khalifa piled raft", b: "The 828 m tower stands on a thick raft over 194 bored piles, each 1.5 m in diameter and about 47.5 m long, in weak calcareous sandstone and siltstone. Poulos & Bunce (2008) used load tests and numerical analysis, and measured settlements compared well with predictions." },
+   links: ["3-3", "4-2", "2-2"], src: ["gec12", "sf"],
+   q: [{ q: "Downdrag on an end-bearing pile mainly affects what?", o: ["Geotechnical ULS capacity", "Settlement and structural axial load", "Lateral capacity", "Nothing"], a: 1, w: "Drag load adds to the axial force in the pile down to the neutral plane, and the pile settles with the soil above it. Capacity at failure is not reduced, because at failure the pile moves down relative to the soil." }] }
+]},
+{ id: 5, t: "Retaining walls & deep excavations", pat: "p-gravel", blurb: "Earth pressure, wall types, support, stability checks, water, movements.", L: [
+ { id: "5-1", t: "Earth pressure", min: 7,
+   lead: "Earth pressure depends on how much the wall moves. Passive resistance needs far more movement than active.",
+   body: `<p><b>At-rest (K0)</b> for walls that don't move. <b>Active</b> develops after small outward movement. <b>Passive</b> needs much larger movement (several % of H in loose sand), which is why passive resistance is often factored or limited.</p>
+<p><b>Theories:</b> Rankine (smooth wall); Coulomb (wall friction δ). Coulomb overestimates passive pressure for large δ, so use log-spiral or Caquot–Kérisel values.</p>
+<p><b>Water</b> often matters more than soil pressure. In clay, the short-term active pressure is σv − 2su, giving a tension-crack zone. Apply the <b>minimum equivalent fluid pressure</b> (5 kPa per metre depth in CIRIA guidance).</p>
+<p>Also allow for compaction pressures behind backfilled walls and surcharges. Stiff propped walls in overconsolidated clay see pressures close to K0, which can exceed 1.</p>`,
+   keys: ["Ka = (1 − sin φ′)/(1 + sin φ′) = tan²(45 − φ′/2)", "Kp = 1/Ka (Rankine)", "Undrained active: σa = σv − 2su", "MEFP ≥ 5 kPa/m (CIRIA C760)"],
+   ex: { k: "In practice", t: "High K0 in London Clay", b: "Embedded walls in London Clay can be loaded by horizontal stresses above the vertical stress near the surface (K0 of 1–2 or more). Wall installation relieves some of this, and C760 discusses how much to assume. This choice drives bending moments and prop loads." },
+   links: ["2-3", "5-4", "1-1"], src: ["c760", "em2504"],
+   q: [{ q: "Compared with the active state, the passive state needs what?", o: ["Less wall movement", "About the same movement", "Much more wall movement", "No movement"], a: 2, w: "Active pressure develops at small movements (around 0.1–0.5% of H). Full passive needs several times more, so designs usually rely on only part of it." }] },
+ { id: "5-2", t: "Wall systems", min: 6,
+   lead: "Choose a wall by depth, groundwater, stiffness needed near neighbours, and whether it becomes permanent.",
+   body: `<ul><li><b>Sheet piles:</b> fast, reusable and fairly watertight, but limited stiffness and depth. Press-in rigs avoid vibration.</li><li><b>Soldier piles and lagging (king post):</b> cheap, not watertight. Use above the water table or with dewatering.</li><li><b>Contiguous piles:</b> gaps between piles, so not watertight. Suited to clay.</li><li><b>Secant piles (hard/soft or hard/firm):</b> near-watertight and good in mixed ground.</li><li><b>Diaphragm walls:</b> panels excavated under bentonite with grabs or cutters. Very stiff, very deep, often part of the permanent structure. Joints are the weak point.</li><li><b>Deep soil mixing walls (SMW/CSM)</b> with steel inserts.</li><li><b>Soil nailing and anchored walls</b> in favourable ground with space for nails or anchors.</li></ul>`,
+   keys: ["Stiffness: sheet < contiguous ≈ secant < diaphragm", "Watertightness: secant / diaphragm / sheet ≫ contiguous / king post"],
+   ex: { k: "Real case", t: "Big Dig slurry walls, Boston", b: "The Central Artery/Tunnel project used extensive slurry (diaphragm) walls to build tunnels next to the old elevated highway and buildings. In 2004, a leak through a defective panel flooded part of the I-93 tunnel. It showed how panel and joint quality controls long-term watertightness." },
+   links: ["5-3", "6-1", "5-5"], src: ["tunnel", "c760"],
+   q: [{ q: "Which wall is not watertight and is used mainly in clay above the water table?", o: ["Diaphragm wall", "Secant pile wall", "Contiguous pile wall", "Sheet pile wall"], a: 2, w: "Contiguous piles have gaps between them, so water and granular soil can pass through." }] },
+ { id: "5-3", t: "Support: props, anchors and top-down", min: 7,
+   lead: "The support system sets how much the wall and ground move.",
+   body: `<p><b>Cantilever walls</b> suit only modest retained heights, and their deflection grows quickly.</p>
+<p><b>Props:</b> steel tubes with walers, corner braces, raking props to a berm or thrust block. <b>Preloading</b> props reduces movement. Steel prop loads change with temperature.</p>
+<p><b>Ground anchors:</b> grouted tendons with the fixed length beyond the active wedge. They need investigation, suitability and acceptance tests (EN ISO 22477-5), may creep in clay, and may need wayleaves under neighbouring land.</p>
+<p><b>Berms</b> give temporary passive support.</p>
+<p><b>Top-down construction:</b> permanent slabs act as very stiff props on plunge columns. Movement is smallest, and the superstructure can rise at the same time.</p>
+<p><b>Prop loads:</b> from beam-spring or FE analysis, and checked against empirical distributed prop loads (CIRIA C517).</p>`,
+   keys: ["Prop load ≈ (support spacing) × (earth + water pressure envelope)", "Steel prop: ΔP ≈ α·ΔT·E·A·(restraint factor)"],
+   ex: { k: "Real case", t: "Nicoll Highway collapse, Singapore, 2004", b: "A deep excavation for the Circle Line in soft marine clay collapsed on 20 April 2004, killing four people. The Committee of Inquiry found an under-designed strut–waler connection that buckled, and wall and strut design based on an undrained analysis that overestimated clay strength. Monitoring showed excessive wall deflection before the collapse, but nobody acted on it." },
+   links: ["5-4", "9-4", "9-5"], src: ["c760", "issmge"],
+   q: [{ q: "What does preloading props mainly achieve?", o: ["Lower prop loads", "Less wall deflection and ground movement", "Lower water pressure", "Faster excavation"], a: 1, w: "Preloading pushes the wall back against the soil and removes slack, so less movement is needed to mobilise prop load." }] },
+ { id: "5-4", t: "Design analysis and stability checks", min: 8,
+   lead: "List every way the excavation can fail, then check each one with an appropriate method.",
+   body: `<p><b>Methods:</b> limit equilibrium (embedment; free or fixed earth support) → beam on springs (WALLAP, Frew) → finite elements (PLAXIS) for soil–structure interaction, staging and ground movements.</p>
+<p><b>Checks:</b></p>
+<ul><li>Toe and rotational stability (embedment)</li><li>Structural bending and shear</li><li>Prop and anchor capacity</li><li><b>Basal heave</b> in soft clay</li><li><b>Hydraulic uplift</b> of the base from a confined aquifer</li><li><b>Piping and boiling</b> in sand</li><li>Overall stability</li><li>Vertical capacity of the wall (top-down loads)</li><li>Ground movements (SLS)</li></ul>
+<p><b>Eurocode 7 DA1</b> (Combinations 1 and 2) with C760 allowances: an unplanned overdig (10% of the retained height, max 0.5 m) and a minimum surcharge (10 kPa).</p>`,
+   keys: ["Basal heave FS ≈ Nc·su / (γH + q), Nc 5.14–9 (Bjerrum & Eide)", "Uplift: γ·t (plug) vs u (aquifer); UPL factors", "Piping: i_crit = γ′/γw ≈ 1"],
+   ex: { k: "Real case", t: "Bjerrum & Eide (1956), Oslo", b: "Bjerrum and Eide developed their basal heave method from records of strutted excavations in soft Oslo clay, including failures. It is still used to check the base of excavations in soft clay." },
+   links: ["5-1", "2-3", "9-2", "9-4", "5-5"], src: ["c760", "em2504", "ec7ret"],
+   q: [{ q: "When is hydraulic uplift of an excavation base most likely?", o: ["Dry sand to great depth", "A clay base over a confined aquifer with high head", "Rock base", "Shallow excavation above the water table"], a: 1, w: "If the aquifer's pore pressure exceeds the weight of the remaining clay plug, the base heaves or blows up. Relief wells or deeper walls are needed." }] },
+ { id: "5-5", t: "Groundwater control in excavations", min: 6,
+   lead: "Choose between keeping water out and pumping it out. Each has consequences for the surroundings.",
+   body: `<p><b>Exclusion:</b> cut-off walls toed into an impermeable layer, grout curtains, jet-grout base plugs, ground freezing.</p>
+<p><b>Pumping:</b> sumps, wellpoints for shallow sands (suction lift about 5–6 m), deep wells, ejectors in fine soils, and relief wells against uplift.</p>
+<p><b>Side effects of pumping:</b> drawdown consolidates soft clay and peat under neighbours, exposed timber piles decay, and contamination migrates. Recharge wells can mitigate this.</p>
+<p><b>Design inputs:</b> permeability from pumping tests; seepage analysis (flow nets or FE); gradients at the wall toe.</p>
+<p><b>Watch the joints:</b> leakage through wall joints is the classic weak point. Probe ahead and pre-grout where needed.</p>`,
+   keys: ["Darcy: q = k·i·A", "Wellpoint suction lift ≈ 5–6 m per stage"],
+   ex: { k: "Real case", t: "Cologne archive collapse, 2009", b: "During excavation of the Waidmarkt station for Cologne's north–south light rail, ground and water flowed into the pit through a defective diaphragm wall joint at depth. The Historical Archive building next door collapsed and two people died. Investigators later traced the defect to an obstruction during panel excavation." },
+   links: ["1-5", "5-2", "5-4", "6-3"], src: ["c760", "tunnel"],
+   q: [{ q: "What is the practical suction lift of a single wellpoint stage?", o: ["~1 m", "~5–6 m", "~15 m", "Unlimited"], a: 1, w: "Suction is limited by atmospheric pressure minus losses, so deeper drawdowns need multiple stages, deep wells or ejectors." }] },
+ { id: "5-6", t: "Ground movements and building damage", min: 8,
+   lead: "In cities, deflection and settlement criteria usually govern the design, not collapse.",
+   body: `<p><b>Empirical:</b> Peck (1969) settlement zones I–III; Clough & O'Rourke (1990): in stiff clays, residual soils and sands the average maximum wall deflection is about 0.2%H. In soft clay, movement depends on the factor of safety against basal heave and on system stiffness EI/(γw·h⁴) (Clough et al. 1989).</p>
+<p><b>Other sources of movement:</b> wall installation, dewatering, prop removal and workmanship.</p>
+<p><b>Building damage assessment (3 stages):</b></p>
+<ul><li>(1) Screening: slope &lt; 1/500 and settlement &lt; 10 mm → negligible risk (Rankin 1988).</li><li>(2) Limiting tensile strain from a deep-beam model (Burland & Wroth 1974; Boscardin & Cording 1989) → damage category.</li><li>(3) Detailed assessment of sensitive buildings and utilities, including soil–structure interaction.</li></ul>
+<p><b>Mitigation:</b> stiffer support, top-down construction, preloaded props, compensation grouting, underpinning, and monitoring with trigger levels.</p>`,
+   keys: ["Category 0 negligible: ε_lim < 0.05%", "1 very slight: 0.05–0.075% · 2 slight: 0.075–0.15%", "3 moderate: 0.15–0.3% · 4–5 severe/very severe: > 0.3%", "Clough & O'Rourke: δh,max ≈ 0.2% H (stiff soils)"],
+   ex: { k: "Real case", t: "Big Ben and Westminster station", b: "For the Jubilee Line Extension, a deep station box with diaphragm walls was built right next to the Elizabeth Tower (Big Ben). Predicted tilt exceeded tolerance, so the team controlled it with compensation grouting from a shaft, timed to the monitoring. Burland and colleagues documented the work." },
+   links: ["2-5", "7-3", "9-5", "3-2"], src: ["c760", "crossrail"],
+   q: [{ q: "In Rankin's screening stage, which building can be dismissed as negligible risk?", o: ["Settlement < 10 mm and slope < 1/500", "Settlement < 50 mm", "Slope < 1/150", "Any building more than 10 m away"], a: 0, w: "Buildings below both thresholds are screened out. Everything else goes on to the second-stage strain assessment." }] }
+]},
+{ id: 6, t: "Cut-and-cover & stations", pat: "p-mud", blurb: "Construction sequences, permanent box design, monitoring and the observational method.", L: [
+ { id: "6-1", t: "Construction sequences: bottom-up vs top-down", min: 6,
+   lead: "The sequence sets movement, programme, surface disruption and waterproofing quality.",
+   body: `<p><b>Bottom-up:</b> build the walls, excavate to formation with temporary props or anchors, cast the base slab, build upward, then remove props and backfill. Simpler, and waterproofing is easy to reach. The trade-offs are larger temporary works, more movement and longer surface disruption.</p>
+<p><b>Top-down:</b> build walls and plunge columns, cast the roof slab early and reinstate the road, then excavate beneath through openings and cast lower slabs as permanent props. This is the stiffest option with the least movement and early surface reinstatement. Muck removal is slower, and joints, waterproofing and column tolerances are harder.</p>
+<p>Mixed and semi-top-down schemes are common, often under road decking. In cities, utility diversions and traffic management often dominate the programme.</p>`,
+   keys: ["Top-down → slabs as props → least movement", "Bottom-up → best access for membranes and QA"],
+   ex: { k: "Real case", t: "Crossrail Canary Wharf station", b: "The station was built inside a cofferdam in the North Dock. The dock was dammed and pumped dry, and the long station box was built bottom-up inside it. This shows how the site's constraints, not textbook preference, choose the method." },
+   links: ["5-2", "5-3", "6-2"], src: ["tunnel", "crossrail"],
+   q: [{ q: "What is the main geotechnical advantage of top-down construction?", o: ["Cheaper waterproofing", "Stiff permanent slabs as props, giving the least movement", "Faster muck removal", "No need for walls"], a: 1, w: "Concrete slabs are far stiffer than temporary props, which limits wall deflection and settlement of neighbours." }] },
+ { id: "6-2", t: "Permanent design of underground boxes", min: 7,
+   lead: "A box spends 120 years in the ground. Long-term water, uplift, joints and earthquakes govern its design.",
+   body: `<p><b>Water:</b> full hydrostatic pressure for the design flood and rising groundwater, plus heave of the clay base.</p>
+<p><b>Uplift (flotation):</b> compare self-weight plus resistance with buoyancy (EC7 UPL check). Resist with tension piles or anchors, a thicker base slab, wall friction or toes keyed into a stratum.</p>
+<p><b>Structure:</b> wall–slab connections (couplers, shear keys), long-term earth pressure (often K0 or more), temperature, creep and shrinkage.</p>
+<p><b>Waterproofing:</b> grade per BS 8102; membranes, waterstops, drained cavities.</p>
+<p><b>Seismic:</b> boxes are deformed by the ground. Design for the <b>racking</b> imposed by free-field shear strain rather than for inertia. Columns need ductility.</p>`,
+   keys: ["UPL: V_dst,d ≤ G_stb,d + R_d", "Racking: Δ_box from free-field shear strain γ_ff × height"],
+   ex: { k: "Real case", t: "Daikai Station, Kobe 1995", b: "In the Hyogo-ken Nanbu (Kobe) earthquake, the central reinforced-concrete columns of this cut-and-cover station failed under racking. The roof collapsed and the road above subsided by about 2.5 m. It was the first modern underground structure to collapse in an earthquake, and it reshaped seismic design of tunnels and stations." },
+   links: ["1-5", "10-1", "9-2"], src: ["tunnel", "ec7"],
+   q: [{ q: "What mainly governs the seismic design of a shallow cut-and-cover box?", o: ["Inertia of the box", "Racking deformation imposed by the ground", "Wind", "Traffic"], a: 1, w: "Underground structures move with the ground. The imposed shear distortion (racking) loads walls, slabs and especially columns." }] },
+ { id: "6-3", t: "Construction risk and the observational method", min: 6,
+   lead: "Monitor, compare with predictions, and act on a plan agreed in advance.",
+   body: `<p><b>Observational method</b> (Peck 1969; EC7 2.7; CIRIA R185): design for the most probable conditions, with a pre-planned response for worse ones. Requirements: acceptable limits, a predicted range of behaviour, a monitoring plan and contingency actions ready to use.</p>
+<p><b>Trigger action plans (TAP):</b> green, amber and red levels on wall deflection, prop loads, settlement and piezometers, with named responsibilities and review frequency.</p>
+<p><b>Instruments:</b> inclinometers in walls, prop strain gauges and load cells, settlement points, automated total stations, piezometers, tiltmeters, crack gauges and distributed fibre-optic sensing.</p>
+<p><b>Typical failures of monitoring:</b> no baseline readings, damaged instruments, data that nobody reviews, and responses that were never agreed.</p>`,
+   keys: ["Green → continue · Amber → review, increase frequency, prepare contingency · Red → implement contingency, stop if needed"],
+   ex: { k: "Real case", t: "Limehouse Link, London", b: "On this cut-and-cover road tunnel in the early 1990s, the observational method let the team change temporary propping based on measured wall behaviour, saving time and money (Glass & Powderham 1994). It is a classic UK reference for the method." },
+   links: ["9-5", "5-6", "5-3"], src: ["c760", "crossrail"],
+   q: [{ q: "What does the observational method require before construction starts?", o: ["Nothing; decide on site", "Pre-planned contingency actions and trigger levels", "A finished building", "A GBR"], a: 1, w: "Without contingency measures prepared in advance, monitoring is just watching. Peck stressed planning a response for every likely deviation." }] }
+]},
+{ id: 7, t: "Tunnelling", pat: "p-chalk", blurb: "Method choice, face stability, settlements, linings, rock tunnels, risk and GBRs.", L: [
+ { id: "7-1", t: "Choosing a tunnelling method", min: 7,
+   lead: "Ground, water, length, geometry and nearby structures choose the method together.",
+   body: `<p><b>Soft ground, closed-face TBMs:</b></p>
+<ul><li><b>EPB:</b> clays, silts, fine sands, with foam or polymer conditioning.</li><li><b>Slurry:</b> coarse permeable soils and high water pressure, with a separation plant.</li></ul>
+<p><b>Rock:</b> open gripper TBMs in good rock; single or double shield in fractured or weak rock; <b>drill and blast</b> for variable ground, short drives and large or irregular sections.</p>
+<p><b>SCL/NATM:</b> flexible geometry (stations, junctions, cross-passages). Needs stand-up time and groundwater control.</p>
+<p><b>Others:</b> cut-and-cover for shallow alignments, immersed tubes for water crossings, pipe jacking and microtunnelling for small diameters.</p>`,
+   keys: ["EPB: fines content high, permeability low (or conditioned)", "Slurry: k high, water pressure high, gravel/sand", "TBM becomes economic over roughly 1–2 km drives"],
+   ex: { k: "Real case", t: "Eurasia Tunnel, Istanbul", b: "A slurry TBM of about 13.7 m diameter bored under the Bosphorus through mixed ground at more than 10 bar water pressure. It included seismic joints for a high-seismicity zone and opened in 2016. The nearby Marmaray crossing used an immersed tube under the strait instead." },
+   links: ["7-2", "1-2", "8-2"], src: ["ita", "tunnel"],
+   q: [{ q: "Which TBM suits permeable gravels below the water table?", o: ["Open gripper", "EPB without conditioning", "Slurry TBM", "Hand mining"], a: 2, w: "Slurry supports the face with pressurised bentonite and controls high-permeability ground well. EPB struggles to build a plug in coarse granular soils." }] },
+ { id: "7-2", t: "Face stability and support pressure", min: 7,
+   lead: "Face pressure must be high enough to prevent collapse and low enough to avoid blow-out.",
+   body: `<p><b>Undrained (clay):</b> stability ratio N = (σv − σT)/su (Broms & Bennermark 1967). N up to about 5–6 is usually stable. Volume loss rises as N approaches collapse.</p>
+<p><b>Drained (sand):</b> wedge–silo models (Horn; Anagnostou & Kovári). Required pressure = effective earth support + water pressure. Seepage toward the face increases the demand.</p>
+<p><b>Upper limit:</b> blow-out or frac-out of slurry or foam to the surface, especially at low cover.</p>
+<p><b>Running the TBM:</b> face pressure, tail-void grout pressure and volume, and muck weight and volume tracking. A mismatch between excavated and theoretical muck is the earliest sign of over-excavation.</p>`,
+   keys: ["N = (σv − σT) / su", "Required face pressure ≈ σ′ (support) + u (water)"],
+   ex: { k: "In practice", t: "Reading the muck", b: "Most sinkholes above closed-face TBMs are preceded by excavated material weighing more than the theoretical volume for that ring. Modern contracts make real-time muck-weight monitoring, with alarm thresholds, part of the TBM trigger action plan." },
+   links: ["2-1", "2-3", "1-5", "7-3"], src: ["ita", "crossrail"],
+   q: [{ q: "An EPB TBM is in sand below the water table. Face pressure must exceed what?", o: ["Atmospheric pressure", "Water pressure plus the effective earth support needed", "Total overburden stress", "Nothing; sands are stable"], a: 1, w: "Below that, the face collapses inward. Above total stress at low cover, it risks blow-out." }] },
+ { id: "7-3", t: "Ground movements from tunnelling", min: 8,
+   lead: "Volume loss and a Gaussian trough: two numbers describe most greenfield settlement.",
+   body: `<p><b>Volume loss</b> (VL) comes from face loss, shield overcut and steering, the tail void, and lining deformation. In clay, long-term consolidation adds more.</p>
+<p><b>Transverse trough:</b> a Gaussian curve (Peck 1969; O'Reilly & New 1982) with trough width i = K·z0.</p>
+<p><b>Other movements:</b> horizontal movement toward the centreline; a longitudinal cumulative-normal profile (roughly 30–50% of maximum settlement above the face). With twin tunnels, the second drive often shows larger VL.</p>
+<p><b>Assessment:</b> the same three-stage building damage approach (lesson 5-6), plus pipe joint rotation and strain for utilities.</p>`,
+   keys: ["Sv(y) = Smax · exp(−y² / 2i²)", "i = K·z0 ; K ≈ 0.5 clay, 0.25–0.45 sand", "Vs = √(2π) · i · Smax ; VL = Vs / (πD²/4)", "Typical VL: closed-face TBM ≈ 0.5–1.5% (often < 1%), SCL ≈ 1–2%"],
+   ex: { k: "Real case", t: "St James's Park, Jubilee Line Extension", b: "A heavily instrumented greenfield site above the JLE tunnels in London Clay (Nyren 1998). Measured troughs matched the Gaussian shape with K close to 0.5, and showed how the second tunnel interacted with the first. It is still a benchmark dataset." },
+   links: ["5-6", "2-5", "7-2", "10-2"], src: ["crossrail", "ita"],
+   q: [{ q: "A tunnel axis is 20 m deep in clay. What is the approximate trough width parameter i?", o: ["5 m", "10 m", "20 m", "40 m"], a: 1, w: "i = K·z0 ≈ 0.5 × 20 = 10 m. The trough extends to about ±2.5i = ±25 m." }] },
+ { id: "7-4", t: "Linings: segments and sprayed concrete", min: 7,
+   lead: "Segments are designed for every stage from the factory to 120 years in the ground. SCL is designed together with its excavation sequence.",
+   body: `<p><b>Segmental linings:</b> precast RC or steel-fibre reinforced concrete (SFRC) rings, universal tapered rings, EPDM gaskets, bolts or dowels.</p>
+<p><b>Segment load cases:</b> demoulding, storage, handling, <b>TBM jack thrust</b> (which often governs bursting and spalling), grouting, ground and water loads (bedded beam, Muir Wood/Curtis), long-term, fire and accidental (ITA WG2, 2019).</p>
+<p><b>SCL:</b> the primary lining is sprayed early with lattice girders, mesh or fibres. The secondary lining is cast in place or sprayed (permanent SCL). Waterproofing uses sheet membranes or sprayed membranes (composite shell).</p>
+<p><b>SCL controls:</b> early-age strength (J-curves), sequence (top heading, bench, invert), and keeping the ring-closure distance short.</p>
+<p><b>QA:</b> thickness probing, laser scanning, cores and convergence monitoring.</p>`,
+   keys: ["Segment design: check every stage, not just the final ground load", "SCL: close the ring early in soft ground"],
+   ex: { k: "Real case", t: "Heathrow Express collapse, 1994", b: "In October 1994, NATM station tunnels in London Clay at Heathrow collapsed, forming large craters. The HSE investigation found lining defects, poor repairs, failure to act on monitoring data, and weak management controls. Record fines followed, and UK SCL practice was reformed." },
+   links: ["6-3", "9-5", "7-5"], src: ["ita", "crossrail"],
+   q: [{ q: "Which temporary load case often governs local segment design?", o: ["Self-weight in storage", "TBM thrust jacks", "Wind", "Traffic above"], a: 1, w: "Jack forces concentrate on small areas and cause bursting and spalling. They often decide reinforcement or fibre dosage." }] },
+ { id: "7-5", t: "Rock tunnels: convergence–confinement", min: 7,
+   lead: "Ground and support share the load. When the support is installed matters as much as how strong it is.",
+   body: `<p><b>Ground reaction curve (GRC):</b> internal support pressure vs tunnel wall displacement.</p>
+<p><b>Longitudinal displacement profile (LDP)</b> (Vlachopoulos & Diederichs 2009): part of the convergence happens before the face arrives (about 30% at the face). Support installed behind the face starts from that displacement.</p>
+<p><b>Support characteristic curve:</b> the stiffness and capacity of shotcrete, bolts and steel sets. Equilibrium is where it meets the GRC. Factor of safety = capacity / demand.</p>
+<p><b>Squeezing</b> (time-dependent large deformation in weak rock under high stress): use yielding support, over-excavation and face bolting.</p>
+<p><b>Failure types:</b> structurally controlled wedges in strong jointed rock at shallow depth; stress-controlled spalling and rockburst at depth.</p>`,
+   keys: ["Squeezing strain (Hoek & Marinos): ε% ≈ 0.2·(σcm/p0)^−2", "ε > ~1% → squeezing problems; > 2.5% severe", "p0 = in-situ stress ≈ γ·z"],
+   ex: { k: "Real case", t: "Gotthard Base Tunnel", b: "In the 57 km Gotthard Base Tunnel (opened 2016), squeezing kakiritic rocks in the Tavetsch intermediate massif were handled with yielding steel arches with sliding joints and deformable support. Gripper TBMs bored the hard-rock sections." },
+   links: ["8-2", "8-3", "7-1"], src: ["hoek", "hoekLib"],
+   q: [{ q: "σcm/p0 = 0.3. What is the expected squeezing strain (Hoek & Marinos)?", o: ["≈ 0.2%", "≈ 0.7%", "≈ 2.2%", "≈ 20%"], a: 2, w: "ε ≈ 0.2 × 0.3⁻² = 0.2 × 11.1 ≈ 2.2%. That means significant squeezing, which needs yielding support." }] },
+ { id: "7-6", t: "Risk, contracts and the GBR", min: 6,
+   lead: "Ground risk drives tunnel cost overruns. Contracts decide who pays for it.",
+   body: `<p><b>Risk management:</b> a risk register from the earliest stage (Joint Code of Practice, ITIG 2012), named risk owners, and updates through design and construction.</p>
+<p><b>GBR</b> (ASCE MOP 154, 2022): contractual statements of the conditions to expect, such as boulder counts and sizes, percentage of rock, and groundwater inflows. The contractor prices up to the baseline. Conditions materially worse than the baseline fall under the owner's <b>differing site conditions</b> clause.</p>
+<p><b>Good baselines</b> are quantitative and measurable, tied to means and methods, and avoid vague words like "may encounter". Keep the GDR (facts), GIR (interpretation) and GBR (contract) consistent.</p>`,
+   keys: ["Baseline example: 'Up to 40 boulders > 0.5 m in drive 2'", "GDR ≠ GIR ≠ GBR"],
+   ex: { k: "Real case", t: "Seattle SR 99, TBM 'Bertha'", b: "The 17.5 m TBM stopped in December 2013 after striking a steel well casing installed years earlier for the owner's own investigation. The main bearing seal was damaged, causing about two years of delay. Whether this was a differing site condition went to court, and the litigation ended in the owner's favour because the well was shown in the reference documents." },
+   links: ["1-2", "9-1", "6-3"], src: ["gbr", "ita"],
+   q: [{ q: "The contractor meets three times the baseline number of boulders. Who usually bears the extra cost?", o: ["The contractor, always", "The owner, under the differing site conditions clause", "The designer", "The insurer only"], a: 1, w: "That is what baselines are for. The contractor carries risk up to the baseline, and the owner carries risk beyond it." }] }
+]},
+{ id: 8, t: "Rock mechanics", pat: "p-rock", blurb: "Discontinuities, classification, Hoek–Brown, slopes, foundations on rock.", L: [
+ { id: "8-1", t: "Intact rock and discontinuities", min: 7,
+   lead: "In most rock masses, the joints control behaviour, not the intact rock.",
+   body: `<p><b>Intact rock:</b> UCS, tensile strength (Brazilian test ≈ UCS/10–20), E and ν. Other factors: anisotropy (shale, schist), slaking and durability (mudrocks), and weathering grades I–VI.</p>
+<p><b>Describing discontinuities (ISRM):</b> orientation, spacing, persistence, roughness (JRC), wall strength (JCS, from Schmidt hammer), aperture, infill, seepage, number of sets and block size.</p>
+<p><b>Joint shear strength:</b> Barton–Bandis. Thick clay infill dominates if present.</p>
+<p><b>Scale effect:</b> larger samples contain more defects and have lower strength.</p>`,
+   keys: ["τ = σn · tan[φr + JRC · log10(JCS/σn)]", "UCS ≈ 20–25 × Is(50) (point load)"],
+   ex: { k: "Real case", t: "Vajont, Italy, 1963", b: "About 270 million m³ of rock slid along clay-rich bedding planes in limestone into the reservoir. The wave overtopped the dam and killed about 2,000 people downstream. The dam itself survived. Reservoir filling had raised pore pressures on the sliding surface." },
+   links: ["8-4", "8-2", "1-5"], src: ["hoek", "hoekLib"],
+   q: [{ q: "What does JRC describe?", o: ["Joint spacing", "Joint roughness", "Joint water pressure", "Rock type"], a: 1, w: "The Joint Roughness Coefficient runs from 0 (smooth) to 20 (very rough) and adds to the friction angle at low normal stress." }] },
+ { id: "8-2", t: "Rock mass classification: RQD, RMR, Q, GSI", min: 7,
+   lead: "Classification systems are a shared language and a first estimate of support. They do not replace analysis.",
+   body: `<ul><li><b>RQD</b> (Deere): % of core in pieces ≥ 100 mm. Simple, but biased by orientation.</li><li><b>RMR</b> (Bieniawski 1989): UCS, RQD, spacing, joint condition, groundwater and an orientation adjustment, scored 0–100. Includes support guidelines and stand-up time.</li><li><b>Q</b> (Barton 1974, updated chart 1993): 0.001–1000. With span/ESR, it gives bolt and fibre-shotcrete support from a chart.</li><li><b>GSI</b> (Hoek): a visual chart of block structure vs surface condition. It is the input to Hoek–Brown, not a support method.</li></ul>
+<p>Don't rely on these alone for squeezing ground or for structurally controlled wedges.</p>`,
+   keys: ["Q = (RQD/Jn) · (Jr/Ja) · (Jw/SRF)", "RQD/Jn → block size; Jr/Ja → joint shear strength; Jw/SRF → active stress", "RMR ≈ 9 ln Q + 44"],
+   ex: { k: "Real case", t: "The Q-system and Norwegian tunnelling", b: "NGI developed the Q-system (1974) from Scandinavian tunnel case histories. It is widely used to choose bolts and fibre-reinforced shotcrete for the Norwegian Method of Tunnelling, and its support chart was updated as wet-mix fibre shotcrete became standard." },
+   links: ["8-3", "7-5", "1-3"], src: ["hoek", "hoekLib"],
+   q: [{ q: "In the Q-system, what does Jr/Ja represent?", o: ["Block size", "Shear strength of the joints", "Water pressure", "Stress"], a: 1, w: "Roughness over alteration approximates inter-block friction." }] },
+ { id: "8-3", t: "Hoek–Brown and rock-mass properties", min: 7,
+   lead: "Hoek–Brown turns GSI, mi, D and σci into rock-mass strength and stiffness.",
+   body: `<p><b>Generalised Hoek–Brown (2002)</b> gives σ′1 in terms of σ′3 and three parameters mb, s and a (equations below).</p>
+<p><b>mi</b> depends on rock type: roughly 32 for granite, about 17 for sandstone, and about 4–9 for mudstone and shale.</p>
+<p><b>Disturbance factor D:</b> 0 for TBM or careful excavation; up to 1 for heavily blasted slopes.</p>
+<p><b>Rock-mass modulus</b> from Hoek & Diederichs (2006). Software fits equivalent Mohr–Coulomb parameters over the relevant stress range.</p>
+<p><b>Limits:</b> Hoek–Brown assumes isotropic behaviour (heavily jointed or intact rock). Blocky masses controlled by a few joint sets need discrete wedge analysis instead.</p>`,
+   keys: ["σ′1 = σ′3 + σci (mb σ′3/σci + s)^a", "mb = mi·exp((GSI−100)/(28−14D)) ; s = exp((GSI−100)/(9−3D))", "a = 0.5 + (e^(−GSI/15) − e^(−20/3))/6", "Erm = Ei (0.02 + (1 − D/2)/(1 + e^((60+15D−GSI)/11)))"],
+   ex: { k: "History", t: "Why GSI replaced RMR as input", b: "Hoek introduced GSI in the mid-1990s because RMR was hard to apply to weak, heterogeneous rock masses. It is a visual geological assessment that feeds straight into the strength criterion. Hoek's free notes explain the reasoning with case studies." },
+   links: ["8-2", "7-5", "9-4"], src: ["hoek", "hoekLib"],
+   q: [{ q: "What does increasing the disturbance factor D do?", o: ["Raises strength", "Reduces rock-mass strength and modulus", "Has no effect", "Changes only density"], a: 1, w: "D accounts for blast damage and stress relief, both of which weaken the rock mass." }] },
+ { id: "8-4", t: "Rock slopes and kinematics", min: 7,
+   lead: "Check first whether a block can move (kinematics), then whether it will (mechanics).",
+   body: `<p><b>Kinematic (Markland) test on a stereonet:</b></p>
+<ul><li><b>Planar sliding:</b> the joint dips out of the face and daylights, dips steeper than φj, and is within about ±20° of the face dip direction.</li><li><b>Wedge:</b> the line of intersection daylights and plunges steeper than φ.</li><li><b>Toppling:</b> steep joints dip into the face.</li></ul>
+<p><b>Mechanics:</b> limit equilibrium with water in tension cracks, plus bolts or anchors. Probabilistic analysis handles variable joint orientation.</p>
+<p><b>Rockfall:</b> trajectory analysis, then barriers, drapes and catch ditches.</p>
+<p><b>Monitoring:</b> radar, prisms and InSAR. The <b>inverse-velocity</b> method (Fukuzono) forecasts time of failure.</p>`,
+   keys: ["Planar: ψ_face > ψ_joint > φj (and daylighting)", "Inverse velocity 1/v → 0 projects time of failure"],
+   ex: { k: "Real case", t: "Bingham Canyon (Manefay) slide, 2013", b: "One of the largest non-volcanic landslides in North American history happened in this Utah open-pit mine. Slope radar and prisms showed accelerating movement, so the pit was evacuated beforehand and nobody was hurt. It is a model case for monitoring and failure forecasting." },
+   links: ["8-1", "8-3", "9-5"], src: ["hoek", "cedd"],
+   q: [{ q: "Planar sliding needs the joint to dip at what angle?", o: ["Steeper than the face", "Flatter than the face but steeper than the joint friction angle", "Into the face", "Horizontally"], a: 1, w: "The joint must daylight in the face (flatter than the face) and be steep enough to overcome friction." }] },
+ { id: "8-5", t: "Foundations on rock and in-situ stress", min: 6,
+   lead: "Rock foundations fail through weak seams, cavities and water, rarely through the intact rock.",
+   body: `<p><b>Bearing:</b> usually controlled by settlement and discontinuities. For <b>rock sockets</b>, side resistance is often correlated with √UCS (Rowe & Armitage; Kulhawy).</p>
+<p><b>Hazards:</b> karst and solution cavities (probe drilling, grouting), weak seams, swelling or slaking mudrocks, and uplift pressure along joints.</p>
+<p><b>In-situ stress:</b> σv ≈ γz (about 0.025–0.027 MPa/m). The ratio k = σh/σv is often above 1 at shallow depth because of tectonics and erosion. It is measured by hydraulic fracturing, overcoring or borehole breakouts. It drives tunnel shape, spalling and rockburst.</p>`,
+   keys: ["σv ≈ 0.027 MPa/m × z", "Socket side resistance ∝ √UCS (empirical)"],
+   ex: { k: "Real case", t: "Malpasset Dam, France, 1959", b: "This thin arch dam failed when its gneiss foundation moved along a fault and seam. Dam thrust closed joints downstream, so water pressure built up beneath the left abutment (Londe's analysis). The flood killed more than 400 people. Since then, rock foundation drainage and uplift are designed explicitly." },
+   links: ["8-1", "1-5", "4-2"], src: ["hoek", "usace"],
+   q: [{ q: "Rock socket side resistance is commonly correlated with what?", o: ["UCS²", "√UCS", "RQD only", "Depth only"], a: 1, w: "Many empirical correlations use fs proportional to the square root of UCS, scaled by atmospheric pressure, with roughness factors." }] }
+]},
+{ id: 9, t: "Design frameworks & practice", pat: "p-rock2", blurb: "Limit states, Eurocode 7 (both generations), numerical modelling, monitoring.", L: [
+ { id: "9-1", t: "Limit states, factors and reliability", min: 6,
+   lead: "Factors of safety are a proxy for probability of failure. The size of a factor reflects consequence and uncertainty.",
+   body: `<p><b>Limit states:</b> ULS (collapse, rupture) vs SLS (deformation, cracking, leakage).</p>
+<p><b>Safety formats:</b> a single global factor of safety (traditional) vs partial factors on actions, materials and resistances (Eurocodes, LRFD). Reliability index β measures how safe a design is.</p>
+<p><b>Sources of uncertainty:</b> natural variability, measurement error, transformation (correlation) models, statistical uncertainty from few tests, and model uncertainty.</p>
+<p><b>Better knowledge earns lower factors:</b> load tests, more investigation, monitoring.</p>`,
+   keys: ["EN 1990: β = 3.8 (RC2, 50-year reference) ↔ Pf ≈ 7×10⁻⁵", "Pf = Φ(−β)"],
+   ex: { k: "Real case", t: "Hong Kong's slope safety system", b: "After fatal landslides in the 1970s (including Po Shan Road in 1972 and Sau Mau Ping in 1976), Hong Kong set up the Geotechnical Control Office, now GEO. Systematic slope registration, upgrading and risk-based management have reduced landslide fatalities dramatically since then. GEO's free Geoguides record that practice." },
+   links: ["9-2", "9-3", "4-3"], src: ["jrc", "cedd"],
+   q: [{ q: "In EN 1990, the target β for RC2 over 50 years is about what?", o: ["1.0", "2.3", "3.8", "6.0"], a: 2, w: "β = 3.8 corresponds to a probability of failure of about 7×10⁻⁵ over 50 years." }] },
+ { id: "9-2", t: "Eurocode 7 (first generation) in practice", min: 7,
+   lead: "Many current projects still use EN 1997-1:2004 and its national annexes, so know DA1 thoroughly.",
+   body: `<p><b>Limit states:</b> EQU, STR, GEO, UPL, HYD.</p>
+<p><b>Design approaches:</b></p>
+<ul><li><b>DA1</b> (UK): Combination 1 = A1 + M1 + R1; Combination 2 = A2 + M2 + R1 (for piles and anchors, A2 + M1 + R4).</li><li><b>DA2</b> (widely used in continental Europe): A1 + M1 + R2.</li><li><b>DA3:</b> A1/A2 + M2 + R3.</li></ul>
+<p><b>Characteristic value:</b> a cautious estimate of the value affecting the occurrence of the limit state.</p>
+<p><b>Geotechnical Categories 1–3.</b> Pile correlation factors ξ and model factors also apply.</p>
+<p>Typical interview question: why does Combination 2 often govern wall embedment? Because factoring tan φ′ by 1.25 raises Ka and lowers Kp.</p>`,
+   keys: ["A1: γG = 1.35, γQ = 1.5 ; A2: γG = 1.0, γQ = 1.3", "M2: γtanφ′ = 1.25, γc′ = 1.25, γcu = 1.4"],
+   ex: { k: "In practice", t: "C760 applies DA1 to walls", b: "CIRIA C760 shows UK practice for embedded walls: DA1 C1 and C2 with SLS checks, unplanned excavation and minimum surcharge. The free Environment Agency summary is a fast way to revise it." },
+   links: ["9-3", "5-4", "1-4"], src: ["c760", "jrc"],
+   q: [{ q: "In DA1 Combination 2, what is mainly factored?", o: ["Permanent actions only", "Soil strengths and variable actions", "Resistances only", "Nothing"], a: 1, w: "C2 uses A2 (permanent actions factored by 1.0, variable actions by 1.3) with M2 (strength factors), so it targets uncertainty in ground strength." }] },
+ { id: "9-3", t: "Eurocode 7 second generation", min: 7,
+   lead: "EN 1997-1/-2:2024 and EN 1997-3 (2025; some sources say 2024) are used with EN 1990:2023. Adoption is being phased in.",
+   body: `<p><b>Structure:</b> Part 1 (general rules), Part 2 (ground properties: investigation and derived values), Part 3 (geotechnical structures: slopes, spread and piled foundations, retaining structures, anchors, rock bolts, reinforced fill, ground improvement).</p>
+<p><b>Key changes:</b></p>
+<ul><li>The <b>Ground Model</b> and <b>Geotechnical Design Model</b> are explicit requirements.</li><li><b>Geotechnical Category</b> comes from Consequence Class plus <b>Geotechnical Complexity Class</b>.</li><li>Reports are formalised (Ground Investigation Report, Geotechnical Design Report).</li><li>Derived → representative → design values replace a single "characteristic" step, with statistical guidance.</li><li>Design Approaches are replaced by verification cases that combine factored actions or effects with factored materials or resistances.</li><li>Explicit rules for verification with <b>numerical methods</b>.</li><li>Reliability is managed through inspection and supervision levels.</li></ul>
+<p>Check the national annex and the transition date for each country.</p>`,
+   keys: ["GC = f(Consequence Class, Geotechnical Complexity Class)", "Ground Model → Geotechnical Design Model → verification"],
+   ex: { k: "In practice", t: "Interview-ready answer", b: "Be ready to say how you would categorise your last project (consequence and complexity → Geotechnical Category), what its Ground Model contained, and how numerical analysis would be verified under the new rules. Few candidates can do this yet." },
+   links: ["9-2", "1-1", "9-4"], src: ["ec7", "ec7lnec", "ec7ret", "jrc"],
+   q: [{ q: "In EC7 2nd generation, how is the Geotechnical Category set?", o: ["Project budget", "Consequence Class + Geotechnical Complexity Class", "Building height only", "The client"], a: 1, w: "Combining consequences of failure with ground and design complexity sets the category, which then drives the investigation, design checks and supervision required." }] },
+ { id: "9-4", t: "Numerical modelling in practice", min: 8,
+   lead: "A model is only as good as its constitutive model, its parameters and its validation. Do hand checks first.",
+   body: `<p><b>Use FE/FD for</b> soil–structure interaction, staged construction, movement prediction and complex geometry.</p>
+<p><b>Constitutive models:</b></p>
+<ul><li>Mohr–Coulomb: fine for failure, poor for deformation.</li><li>Hardening Soil: stress-dependent stiffness, unloading and reloading.</li><li>HS-small: adds small-strain stiffness.</li><li>Soft Soil Creep: time-dependent compression.</li><li>NGI-ADP: anisotropic undrained strength.</li><li>Hoek–Brown: rock.</li></ul>
+<p><b>Undrained options in PLAXIS:</b> Method A (effective parameters, so su is a model <i>output</i> and can be wrong), Method B (effective stiffness with su as input), Method C (total stress). Choose deliberately.</p>
+<p><b>Setup:</b> mesh and boundaries, initial stresses (K0), interfaces, staging, groundwater, drainage and consolidation.</p>
+<p><b>Verify and validate:</b> closed-form benchmarks, sensitivity studies, back-analysis of monitoring and peer review.</p>`,
+   keys: ["Check: does the model's su match your su profile?", "Sensitivity: K0, stiffness, interface strength, drainage"],
+   ex: { k: "Real case", t: "Nicoll Highway, again", b: "The Committee of Inquiry found that Method A with Mohr–Coulomb in soft marine clay overestimated the undrained strength. That underestimated wall deflections and bending moments. This is now a standard teaching case on undrained modelling." },
+   links: ["2-5", "5-4", "9-3", "8-3"], src: ["issmge", "c760"],
+   q: [{ q: "What is the main risk of 'Method A' undrained analysis in soft clay?", o: ["It is too slow", "The model's implied su may differ from (often exceed) the real su", "It ignores water", "It can't model walls"], a: 1, w: "With effective parameters, su comes out of the stress path the model predicts. Simple models often overpredict it for soft clay." }] },
+ { id: "9-5", t: "Monitoring and new sensing", min: 6,
+   lead: "Monitoring checks the design, protects neighbours, and gives you data to learn from.",
+   body: `<p><b>Classic instruments:</b> inclinometers, extensometers, vibrating-wire piezometers, load cells, strain gauges, settlement points, automated total stations (ATS), tiltmeters, crack gauges.</p>
+<p><b>Newer tools:</b></p>
+<ul><li><b>Distributed fibre-optic sensing</b> (BOTDR/BOTDA): continuous strain along piles, walls and segments.</li><li><b>Satellite InSAR:</b> mm-level settlement over whole cities, including historic baselines from archived data.</li><li>UAV photogrammetry and wireless IoT sensors.</li></ul>
+<p><b>Making it work:</b> a trigger action plan, a data platform, alarms and clear accountability. Use the data to back-analyse and update the model.</p>`,
+   keys: ["InSAR: wide area, historic baseline, mm/yr; limited by line of sight and coherence", "DFOS: thousands of strain points per cable"],
+   ex: { k: "Real case", t: "Crossrail monitoring", b: "Crossrail combined automated total stations, precise levelling and satellite InSAR to monitor settlement across central London. Compensation grouting beneath sensitive buildings was controlled from near-real-time data. Its Learning Legacy papers describe the system." },
+   links: ["6-3", "5-6", "7-3", "10-3"], src: ["crossrail"],
+   q: [{ q: "What is a key advantage of InSAR for urban tunnelling?", o: ["It measures pore pressure", "Wide-area coverage with a historic baseline from archive data", "It works underground", "It replaces all other instruments"], a: 1, w: "Archived satellite data shows what was already moving before works started, which is valuable for damage claims and for setting baselines." }] }
+]},
+{ id: 10, t: "Specialist & emerging topics", pat: "p-rock3", blurb: "Liquefaction, ground improvement, digital geotechnics, carbon, energy geostructures.", L: [
+ { id: "10-1", t: "Liquefaction and seismic geotechnics", min: 7,
+   lead: "Loose saturated sands under cyclic loading can lose almost all their strength.",
+   body: `<p><b>Mechanism:</b> cyclic shear makes loose saturated sand contract, so pore pressure rises toward σ′v and strength and stiffness collapse.</p>
+<p><b>Consequences:</b> settlement, lateral spreading, bearing failure, and buried structures floating up (manholes, tunnels).</p>
+<p><b>Triggering:</b> the simplified procedure (Seed & Idriss 1971) compares CSR with CRR from CPT, SPT or Vs (Boulanger & Idriss 2014).</p>
+<p><b>Related topics:</b> site response, Vs30 site classes, seismic earth pressure (Mononobe–Okabe), and racking of underground structures (lesson 6-2).</p>
+<p><b>Mitigation:</b> densification, drains, DSM grids, stone columns, or piles through the liquefiable layer.</p>`,
+   keys: ["CSR = 0.65 · (amax/g) · (σv/σ′v) · rd", "FS = CRR(M7.5, σ′=1atm) · MSF · Kσ / CSR"],
+   ex: { k: "Real case", t: "Niigata 1964 and Christchurch 2010–11", b: "In Niigata, the Kawagishi-cho apartment buildings tilted and overturned on liquefied sand. They became the iconic image that launched modern liquefaction research. In Christchurch, widespread liquefaction damaged thousands of homes and led to 'red-zoned' land, and it drove the next generation of CPT-based methods." },
+   links: ["2-4", "1-3", "6-2", "10-2"], src: ["issmge", "caltrans"],
+   q: [{ q: "What does the factor 0.65 in the CSR equation represent?", o: ["Gravity", "Converting peak stress to an equivalent uniform cyclic stress", "Water density", "Sand friction"], a: 1, w: "Seed & Idriss took about 65% of peak shear stress as the representative uniform cyclic stress for the irregular earthquake record." }] },
+ { id: "10-2", t: "Ground improvement", min: 7,
+   lead: "Changing the ground can be cheaper than designing around it. Choose the method by soil type and goal.",
+   body: `<p><b>Families (FHWA GEC 13):</b></p>
+<ul><li><b>Densification:</b> vibro-compaction, dynamic compaction.</li><li><b>Faster consolidation:</b> PVDs with preload, vacuum preloading.</li><li><b>Reinforcement:</b> stone columns, rigid inclusions, geosynthetics.</li><li><b>Mixing and grouting:</b> DSM, jet grouting, permeation grouting.</li><li><b>Movement control:</b> compaction and compensation grouting.</li><li><b>Ground freezing.</b></li></ul>
+<p><b>Choose by</b> grading and fines content, the goal (strength, stiffness, permeability, liquefaction), and constraints such as access, vibration and spoil.</p>
+<p><b>Verify</b> with before-and-after CPTs, load tests and cores.</p>`,
+   keys: ["Vibro-compaction: clean sands (fines ≲ 10–15%)", "Stone columns / DSM: silty and clayey soils"],
+   ex: { k: "Real case", t: "Compensation grouting under Big Ben", b: "Grout was injected between the excavation and the Elizabeth Tower's foundation, in controlled episodes driven by tilt monitoring. It offset ground loss as it happened. This is ground improvement used as active control (see lesson 5-6)." },
+   links: ["2-2", "10-1", "7-3"], src: ["gec13", "caltrans"],
+   q: [{ q: "A silty sand has 30% fines. Which is likely ineffective?", o: ["Vibro-compaction", "Stone columns", "Deep soil mixing", "Jet grouting"], a: 0, w: "Vibro-compaction relies on clean sands rearranging under vibration. High fines prevent densification." }] },
+ { id: "10-3", t: "Digital geotechnics and data", min: 6,
+   lead: "Ground data is becoming structured, shared and model-ready. Employers increasingly expect this.",
+   body: `<p><b>Standards:</b> AGS 4 (UK and international), DIGGS (US), <b>IFC 4.3</b> (adds alignment and geotechnical entities to open BIM), and ISO 19650 for information management.</p>
+<p><b>3D ground models:</b> Leapfrog Works and similar tools, federated with BIM. Show uncertainty, not just the best guess.</p>
+<p><b>Machine learning:</b> CPT-based classification, parameter prediction, TBM performance and cutter wear, anomaly detection in monitoring data. Watch for small or biased datasets, extrapolation and lack of explainability. Keep engineering judgement in the loop.</p>
+<p><b>Digital twins:</b> monitoring plus model updating (for example Bayesian back-analysis) during construction.</p>`,
+   keys: ["AGS 4 / DIGGS → database → 3D model → BIM (IFC 4.3)", "ML rule: never extrapolate outside the training geology"],
+   ex: { k: "Real case", t: "New Zealand Geotechnical Database", b: "After the Canterbury earthquakes, New Zealand built a shared online database of CPTs, boreholes and lab tests from many organisations. Investigation data became a reusable public asset, and it is now used for design and research nationwide." },
+   links: ["1-3", "9-5", "1-1"], src: ["issmge", "ita"],
+   q: [{ q: "Why does IFC 4.3 matter to geotechnical engineers?", o: ["It is a pile design code", "It adds geotechnical and alignment entities to open BIM", "It replaces Eurocode 7", "It is a CPT standard"], a: 1, w: "It lets boreholes, strata and geotechnical elements live in the same open model as the structures." }] },
+ { id: "10-4", t: "Carbon and sustainability", min: 6,
+   lead: "Substructure is a large and growing target in carbon reduction. Geotechnical engineers control big levers.",
+   body: `<p><b>Why it matters:</b> foundations, basements and retaining walls are concrete- and steel-heavy, so they make up a significant share of a project's upfront embodied carbon.</p>
+<p><b>Levers:</b></p>
+<ul><li>Efficient design: settlement-based pile design, load tests to cut factors, piled rafts.</li><li>Lower-carbon materials: GGBS cement replacement, recycled steel.</li><li><b>Reuse existing foundations</b> (RuFUS guidance).</li><li>Leaner temporary works and less spoil haulage.</li></ul>
+<p><b>Tools:</b> the EFFC–DFI carbon calculator, and <b>PAS 2080</b> for carbon management in infrastructure.</p>
+<p><b>Trade-offs:</b> durability, programme and risk.</p>`,
+   keys: ["Carbon ≈ Σ (material quantity × emission factor) + transport + plant", "Biggest lever: avoid material (design efficiency, reuse)"],
+   ex: { k: "Real case", t: "RuFUS and foundation reuse", b: "The EU RuFUS project (Reuse of Foundations for Urban Sites, 2006) published guidance on assessing and reusing existing piles. Foundation reuse on dense urban sites, such as in London, is now a mainstream low-carbon option." },
+   links: ["4-3", "3-3", "9-1"], src: ["issmge"],
+   q: [{ q: "What is PAS 2080 about?", o: ["Pile testing", "Carbon management in infrastructure", "Tunnel fire safety", "CPT procedures"], a: 1, w: "PAS 2080 sets out how infrastructure value chains manage and reduce whole-life carbon." }] },
+ { id: "10-5", t: "Energy geostructures", min: 5,
+   lead: "Piles, walls and tunnel linings can double as heat exchangers, as long as the design accounts for the thermal loads.",
+   body: `<p><b>How it works:</b> heat-exchange pipes cast into piles, diaphragm walls or tunnel segments connect to a heat pump, supplying low-carbon heating and cooling.</p>
+<p><b>Thermo-mechanical effects:</b> heating expands the pile, adding compression where it is restrained. Cooling contracts it, which can induce tension and reverse shaft friction. Thermal cycles matter, and the ground must not freeze.</p>
+<p><b>Design inputs:</b> thermal response tests, ground thermal conductivity, and groundwater flow (which helps).</p>`,
+   keys: ["Restrained thermal stress ≈ E·α·ΔT × (degree of restraint)", "α (concrete) ≈ 10–12 × 10⁻⁶ /°C"],
+   ex: { k: "Real case", t: "Lambeth College energy pile, London", b: "Bourne-Webb et al. (2009) instrumented a test energy pile in London Clay through heating and cooling cycles. They measured thermal axial strains and stress changes, and their results became the basis of the design framework for energy piles." },
+   links: ["4-2", "4-3", "10-4"], src: ["issmge"],
+   q: [{ q: "A pile restrained at head and toe is heated. What happens to its axial stress?", o: ["Additional compression", "Additional tension", "Nothing", "It liquefies"], a: 0, w: "The pile wants to expand. Restraint prevents it, so compressive stress builds up." }] }
+]}
+];
+
+/* ---------- Threads ---------- */
+const THREADS = [
+ { id: 1, t: "Effective stress and drainage", d: "One idea explains short-term vs long-term behaviour across foundations, walls and tunnels.", steps: [
+   ["2-1", "Start here: σ′ = σ − u, and drainage time ∝ H²/cv."],
+   ["2-2", "Drainage over time gives consolidation settlement."],
+   ["2-3", "Drained vs undrained strength: which one applies, and when."],
+   ["3-1", "Footings on clay: check undrained (short-term) and drained (long-term) bearing."],
+   ["5-4", "Excavations: unloading makes the long-term case critical; base uplift is a pore pressure problem."],
+   ["5-5", "Controlling water changes effective stress, and causes neighbours to settle."],
+   ["7-2", "TBM face pressure balances water pressure plus effective support."] ] },
+ { id: 2, t: "Stiffness and ground movement", d: "From small-strain lab data to protecting the building next door.", steps: [
+   ["2-5", "Soil is stiff at small strains, and most structures cause small strains."],
+   ["3-2", "Settlement of footings and rafts."],
+   ["5-6", "Wall deflections → settlement troughs → building damage categories."],
+   ["7-3", "Tunnels: volume loss and the Gaussian trough."],
+   ["9-4", "Numerical models need the right stiffness model to predict this."],
+   ["9-5", "Monitoring closes the loop and calibrates the next design."] ] },
+ { id: 3, t: "Water is usually the problem", d: "Follow groundwater through the major failures and design checks.", steps: [
+   ["1-5", "Measure it properly: piezometers, seasons, aquifers."],
+   ["5-5", "Excavations: exclusion vs pumping; Cologne 2009."],
+   ["6-2", "Permanent boxes: uplift and waterproofing."],
+   ["7-2", "Tunnel faces under water pressure."],
+   ["8-1", "Vajont: pore pressure on a sliding plane."],
+   ["8-5", "Malpasset: uplift under a dam foundation."],
+   ["10-1", "Liquefaction: undrained cyclic loading."] ] },
+ { id: 4, t: "Uncertainty, risk and contracts", d: "How the profession turns unknown ground into decisions and contracts.", steps: [
+   ["1-2", "Investigate in phases, and budget enough to do it properly."],
+   ["1-4", "From scattered data to cautious design values."],
+   ["9-1", "Factors of safety and reliability."],
+   ["7-6", "GBRs allocate ground risk in the contract."],
+   ["6-3", "Observational method: manage uncertainty during construction."],
+   ["9-5", "Monitoring makes the risk visible."] ] },
+ { id: 5, t: "Rock: from joints to tunnels", d: "Build rock engineering from description to support design.", steps: [
+   ["8-1", "Describe intact rock and discontinuities."],
+   ["8-2", "Classify the mass: RQD, RMR, Q, GSI."],
+   ["8-3", "Convert to strength and stiffness with Hoek–Brown."],
+   ["7-5", "Design tunnel support with convergence–confinement."],
+   ["8-4", "Slopes: kinematics, then mechanics."],
+   ["8-5", "Foundations and in-situ stress."] ] },
+ { id: 6, t: "Failures that changed practice", d: "Eight disasters every interviewer expects you to know, and the lesson from each.", steps: [
+   ["3-1", "Transcona 1913: undrained bearing theory confirmed."],
+   ["2-3", "Carsington 1984: progressive failure and brittleness."],
+   ["8-1", "Vajont 1963: pore pressure on clay-filled bedding planes."],
+   ["8-5", "Malpasset 1959: uplift in rock foundations."],
+   ["7-4", "Heathrow 1994: SCL quality and acting on monitoring."],
+   ["6-2", "Daikai 1995: seismic racking of underground boxes."],
+   ["5-3", "Nicoll Highway 2004: connections, undrained modelling, ignored warnings."],
+   ["5-5", "Cologne 2009: leaking diaphragm wall joints."],
+   ["2-4", "Fundão 2015: contractive tailings and flow liquefaction."] ] },
+ { id: 7, t: "An urban metro station, end to end", d: "Walk one project through the whole curriculum, as you would describe it in an interview.", steps: [
+   ["1-1", "Geology: which units, and where's the water?"],
+   ["1-2", "Phased investigation and the baseline report."],
+   ["5-2", "Pick the wall: diaphragm or secant?"],
+   ["5-3", "Support: props, anchors or top-down?"],
+   ["5-4", "Check heave, uplift, toe stability and structural capacity."],
+   ["6-1", "Construction sequence and traffic."],
+   ["6-2", "Permanent box: uplift, waterproofing, seismic."],
+   ["5-6", "Predict movements and assess nearby buildings."],
+   ["6-3", "Trigger levels and the observational method."],
+   ["7-1", "Running tunnels into the box: TBM type."],
+   ["7-3", "Tunnel-induced settlement and mitigation."] ] }
+];
+
+/* ---------- Helpers & state ---------- */
+const LESSONS = []; M.forEach(m => m.L.forEach(l => { l.m = m; LESSONS.push(l); }));
+const byId = id => LESSONS.find(l => l.id === id);
+const KEY = "ggt-progress-v1";
+let S = { done: {}, last: null, qr: 0, qt: 0 };
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+const doneCount = () => LESSONS.filter(l => S.done[l.id]).length;
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+
+function gauge() {
+  const d = doneCount(), n = LESSONS.length;
+  document.getElementById("gaugeTxt").textContent = d.toFixed(1) + " / " + n + " m";
+  document.getElementById("gaugeBar").style.width = (100 * d / n) + "%";
+}
+function go(h) { if (location.hash === "#" + h) route(); else location.hash = h; }
+function setNav(which) { ["home","threads","quiz","sources"].forEach(k => { const b = document.getElementById("nav-" + k); if (k === which) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); }); }
+
+/* ---------- Views ---------- */
+function viewHome(filter) {
+  setNav("home");
+  const next = LESSONS.find(l => !S.done[l.id]) || LESSONS[0];
+  const resumeId = S.last && byId(S.last) && !S.done[S.last] ? S.last : next.id;
+  const r = byId(resumeId);
+  let depth = 0;
+  const strata = M.map(m => {
+    const top = depth, bot = depth + m.L.length; depth = bot;
+    const d = m.L.filter(l => S.done[l.id]).length;
+    const pct = 100 * d / m.L.length;
+    return `<button class="stratum" type="button" data-go="m-${m.id}" aria-label="${esc(m.t)}: ${d} of ${m.L.length} lessons done">
+      <div class="s-depth"><span>${top.toFixed(1)}</span><span>${bot.toFixed(1)}</span></div>
+      <div class="s-col"><div class="pat ${m.pat}"></div><div class="pat fillpart ${m.pat}" style="height:${pct}%"></div></div>
+      <div class="s-desc"><h3>${esc(m.t)}</h3><p>${esc(m.blurb)}</p><span class="s-meta">${d}/${m.L.length} lessons · ${m.L.reduce((a, l) => a + l.min, 0)} min</span></div>
+    </button>`;
+  }).join("");
+  app.innerHTML = `<div class="stack view">
+    <section class="hero"><div class="eyebrow">Geotechnical engineering refresher</div><h1>Drill down, one metre at a time</h1>
+      <p>${LESSONS.length} short lessons in ${M.length} modules, from soil and rock through foundations, deep excavations, cut-and-cover and tunnels. Each lesson has key numbers, a real case, links to related topics and a quick check. Every lesson you finish adds a metre to your borehole.</p></section>
+    <div class="resume"><div class="txt"><div class="eyebrow">${doneCount() ? "Continue" : "Start here"} · ${esc(r.m.t)}</div><h3>${esc(r.t)}</h3></div><button class="btn" type="button" data-go="l-${r.id}">Open lesson</button></div>
+    <input class="search" id="search" type="search" placeholder="Search lessons, e.g. 'heave', 'Hoek', 'Nicoll'" value="${esc(filter || "")}" aria-label="Search lessons">
+    <div id="results"></div>
+    <div class="log" id="log"><div class="log-head"><div>Depth (m)</div><div>Legend</div><div>Module</div></div>${strata}</div>
+  </div>`;
+  const inp = document.getElementById("search");
+  inp.addEventListener("input", () => renderResults(inp.value));
+  if (filter) renderResults(filter);
+}
+function renderResults(qs) {
+  const box = document.getElementById("results"), log = document.getElementById("log");
+  const q = qs.trim().toLowerCase();
+  if (!q) { box.innerHTML = ""; log.hidden = false; return; }
+  const hits = LESSONS.filter(l => (l.t + " " + l.lead + " " + l.body + " " + l.ex.t + " " + l.ex.b + " " + l.keys.join(" ")).toLowerCase().includes(q));
+  log.hidden = true;
+  box.innerHTML = hits.length ? `<div class="lesson-list">${hits.map(lrow).join("")}</div>` : `<p class="empty">No lessons mention “${esc(qs)}”. Try a broader term.</p>`;
+}
+function lrow(l) {
+  return `<button class="lrow" type="button" data-go="l-${l.id}"><span class="num">${l.id}</span><span class="t">${esc(l.t)}<small>${esc(l.ex.t)} · ${l.min} min</small></span><span class="tick ${S.done[l.id] ? "on" : ""}">${TICK}</span></button>`;
+}
+function viewModule(id) {
+  setNav("home");
+  const m = M.find(x => x.id === id); if (!m) return viewHome();
+  const d = m.L.filter(l => S.done[l.id]).length;
+  app.innerHTML = `<div class="stack view">
+    <button class="crumb" type="button" data-go="home">← Borehole log</button>
+    <div class="mod-head"><div class="bar ${m.pat}"></div><div><div class="eyebrow">Module ${m.id} · ${d}/${m.L.length} done</div><h1>${esc(m.t)}</h1><p class="muted" style="margin:6px 0 0">${esc(m.blurb)}</p></div></div>
+    <div class="lesson-list">${m.L.map(lrow).join("")}</div>
+  </div>`;
+}
+function quizBlock(qs, prefix) {
+  return qs.map((x, i) => `<div class="q" data-q="${prefix}-${i}"><div class="qt">${esc(x.q)}</div><div class="opts">${x.o.map((o, j) => `<button class="opt" type="button" data-opt="${j}">${esc(o)}</button>`).join("")}</div><div class="why" hidden></div></div>`).join("");
+}
+function wireQuiz(root, qs, prefix, onAnswer) {
+  root.querySelectorAll(".q").forEach(qel => {
+    const i = +qel.dataset.q.split("-").pop(); const x = qs[i];
+    qel.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+      const j = +b.dataset.opt;
+      qel.querySelectorAll(".opt").forEach((bb, k) => { bb.disabled = true; if (k === x.a) bb.classList.add("right"); });
+      if (j !== x.a) b.classList.add("wrong");
+      const w = qel.querySelector(".why"); w.hidden = false;
+      w.innerHTML = `<b>${j === x.a ? "Correct." : "Not quite."}</b> ${esc(x.w)}`;
+      if (onAnswer) onAnswer(j === x.a);
+    }));
+  });
+}
+function viewLesson(id) {
+  setNav("home");
+  const l = byId(id); if (!l) return viewHome();
+  S.last = id; save();
+  const idx = LESSONS.indexOf(l), prev = LESSONS[idx - 1], next = LESSONS[idx + 1];
+  const done = !!S.done[id];
+  const threads = THREADS.filter(t => t.steps.some(s => s[0] === id));
+  app.innerHTML = `<article class="stack view lesson">
+    <button class="crumb" type="button" data-go="m-${l.m.id}">← Module ${l.m.id}: ${esc(l.m.t)}</button>
+    <header><div class="meta">Lesson ${l.id} · ${l.min} min read</div><h1>${esc(l.t)}</h1></header>
+    <p class="lead prose" style="margin:0">${esc(l.lead)}</p>
+    <div class="prose">${l.body}</div>
+    <section class="keys"><div class="section-label">Key numbers &amp; equations</div><ul>${l.keys.map(k => `<li>${esc(k)}</li>`).join("")}</ul></section>
+    <section class="case"><span class="tag">${esc(l.ex.k)}</span><h3>${esc(l.ex.t)}</h3><p>${esc(l.ex.b)}</p></section>
+    <section><div class="section-label">Connects to</div><div class="chips">${l.links.map(x => byId(x)).filter(Boolean).map(x => `<button class="chip" type="button" data-go="l-${x.id}"><span class="n">${x.id}</span>${esc(x.t)}</button>`).join("")}</div>
+      ${threads.length ? `<div class="chips" style="margin-top:10px">${threads.map(t => `<button class="chip" type="button" data-go="t-${t.id}"><span class="n">Thread</span>${esc(t.t)}</button>`).join("")}</div>` : ""}</section>
+    <section><div class="section-label">Check yourself</div><div class="stack">${quizBlock(l.q, "L")}</div></section>
+    <section><div class="section-label">Read further</div><ul class="srcs">${l.src.map(k => SRC[k]).filter(Boolean).map(s => `<li><a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></li>`).join("")}</ul></section>
+    <div><button class="btn ${done ? "done" : ""}" type="button" id="markBtn">${done ? TICK.replace('viewBox', 'width="16" height="16" viewBox') + " Learned" : "Mark as learned"}</button></div>
+    <nav class="pager"><button type="button" ${prev ? `data-go="l-${prev.id}"` : "disabled"}><small>Previous</small><span>${prev ? esc(prev.t) : ""}</span></button><button type="button" ${next ? `data-go="l-${next.id}"` : "disabled"}><small>Next</small><span>${next ? esc(next.t) : ""}</span></button></nav>
+  </article>`;
+  wireQuiz(app, l.q, "L");
+  document.getElementById("markBtn").addEventListener("click", () => {
+    if (S.done[id]) delete S.done[id]; else S.done[id] = true;
+    save(); gauge(); viewLesson(id);
+  });
+}
+function viewThreads() {
+  setNav("threads");
+  app.innerHTML = `<div class="stack view">
+    <section class="hero"><div class="eyebrow">Connecting the dots</div><h1>Threads</h1><p>Each thread follows one idea across modules, in the order you would explain it in an interview.</p></section>
+    ${THREADS.map(t => { const d = t.steps.filter(s => S.done[s[0]]).length; return `<button class="thread" type="button" data-go="t-${t.id}"><span class="eyebrow">${t.steps.length} stops · ${d} learned</span><h3>${esc(t.t)}</h3><p>${esc(t.d)}</p></button>`; }).join("")}
+  </div>`;
+}
+function viewThread(id) {
+  setNav("threads");
+  const t = THREADS.find(x => x.id === id); if (!t) return viewThreads();
+  app.innerHTML = `<div class="stack view">
+    <button class="crumb" type="button" data-go="threads">← All threads</button>
+    <section class="hero"><div class="eyebrow">Thread</div><h1>${esc(t.t)}</h1><p>${esc(t.d)}</p></section>
+    <ol class="steps">${t.steps.map(([lid, why]) => { const l = byId(lid); return `<li><span class="dot ${S.done[lid] ? "on" : ""}"></span><button class="stitle" type="button" data-go="l-${lid}">${lid} · ${esc(l.t)}</button><p>${esc(why)}</p></li>`; }).join("")}</ol>
+  </div>`;
+}
+let QZ = { scope: "all", mod: 1, cur: null, right: 0, total: 0 };
+function quizPool() {
+  let ls = LESSONS;
+  if (QZ.scope === "learned") ls = LESSONS.filter(l => S.done[l.id]);
+  if (QZ.scope === "module") ls = LESSONS.filter(l => l.m.id === QZ.mod);
+  const pool = []; ls.forEach(l => l.q.forEach(q => pool.push({ q, l })));
+  return pool;
+}
+function pickQ() { const p = quizPool(); if (!p.length) return null; let c; let n = 0; do { c = p[Math.floor(Math.random() * p.length)]; n++; } while (p.length > 1 && QZ.cur && c.q === QZ.cur.q && n < 10); return c; }
+function viewQuiz() {
+  setNav("quiz");
+  if (!QZ.cur) QZ.cur = pickQ();
+  const c = QZ.cur;
+  app.innerHTML = `<div class="stack view">
+    <section class="hero"><div class="eyebrow">Interview drill</div><h1>Quiz</h1><p>Random questions from the lessons. Each answer links back to its lesson.</p></section>
+    <div class="seg" role="group" aria-label="Question pool">
+      <button type="button" data-scope="all" aria-pressed="${QZ.scope === "all"}">All lessons</button>
+      <button type="button" data-scope="learned" aria-pressed="${QZ.scope === "learned"}">Learned only</button>
+      <button type="button" data-scope="module" aria-pressed="${QZ.scope === "module"}">One module</button>
+    </div>
+    ${QZ.scope === "module" ? `<select class="sel" id="qmod" aria-label="Module">${M.map(m => `<option value="${m.id}" ${m.id === QZ.mod ? "selected" : ""}>${m.id}. ${esc(m.t)}</option>`).join("")}</select>` : ""}
+    <div class="score">This session: ${QZ.right} / ${QZ.total} correct · All time: ${S.qr} / ${S.qt}</div>
+    ${c ? `<div id="qbox">${quizBlock([c.q], "Z")}</div>
+      <div class="chips"><button class="chip" type="button" data-go="l-${c.l.id}"><span class="n">${c.l.id}</span>${esc(c.l.t)}</button></div>
+      <div><button class="btn" type="button" id="nextQ">Next question</button></div>`
+    : `<p class="empty">No questions yet. Mark some lessons as learned, or switch to All lessons.</p>`}
+  </div>`;
+  app.querySelectorAll("[data-scope]").forEach(b => b.addEventListener("click", () => { QZ.scope = b.dataset.scope; QZ.cur = pickQ(); viewQuiz(); }));
+  const sel = document.getElementById("qmod"); if (sel) sel.addEventListener("change", () => { QZ.mod = +sel.value; QZ.cur = pickQ(); viewQuiz(); });
+  if (c) {
+    wireQuiz(document.getElementById("qbox"), [c.q], "Z", ok => { QZ.total++; S.qt++; if (ok) { QZ.right++; S.qr++; } save(); const sc = app.querySelector(".score"); if (sc) sc.textContent = `This session: ${QZ.right} / ${QZ.total} correct · All time: ${S.qr} / ${S.qt}`; });
+    document.getElementById("nextQ").addEventListener("click", () => { QZ.cur = pickQ(); viewQuiz(); window.scrollTo(0, 0); });
+  }
+}
+function viewSources() {
+  setNav("sources");
+  const groups = {};
+  Object.values(SRC).forEach(s => { (groups[s[2]] = groups[s[2]] || []).push(s); });
+  const order = ["Hubs", "Soil", "Foundations", "Excavations", "Tunnels", "Rock", "Codes", "Ground improvement"];
+  app.innerHTML = `<div class="stack view">
+    <section class="hero"><div class="eyebrow">Library</div><h1>Sources</h1><p>The free and official references behind the lessons. The full annotated library, including paid textbooks and standards, is kept in your repository and grows over time.</p></section>
+    ${order.filter(g => groups[g]).map(g => `<section class="srcgroup"><h2>${g}</h2><ul>${groups[g].filter((s, i, a) => a.findIndex(z => z[0] === s[0]) === i).map(s => `<li><a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></li>`).join("")}</ul></section>`).join("")}
+    <section class="srcgroup"><h2>Core textbooks (paid)</h2><ul>
+      <li>Terzaghi, Peck &amp; Mesri: <i>Soil Mechanics in Engineering Practice</i></li>
+      <li>Knappett &amp; Craig: <i>Craig's Soil Mechanics</i> · Atkinson: <i>The Mechanics of Soils and Foundations</i></li>
+      <li>Tomlinson &amp; Woodward: <i>Pile Design and Construction Practice</i> · Fleming et al.: <i>Piling Engineering</i></li>
+      <li>Ou: <i>Deep Excavation: Theory and Practice</i> · Puller: <i>Deep Excavations</i> · CIRIA C760</li>
+      <li>Chapman, Metje &amp; Stärk: <i>Introduction to Tunnel Construction</i> · Guglielmetti et al.: <i>Mechanized Tunnelling in Urban Areas</i></li>
+      <li>Goodman: <i>Introduction to Rock Mechanics</i> · Wyllie: <i>Rock Slope Engineering</i></li>
+    </ul></section>
+    <p class="note">Case summaries are condensed from published investigations and papers. Check figures against the original reports before quoting them in a design document. Progress is saved only in this browser.</p>
+    <div><button class="btn ghost" type="button" id="resetBtn">Reset my progress</button> <span class="small muted" id="resetMsg"></span></div>
+  </div>`;
+  let armed = false;
+  document.getElementById("resetBtn").addEventListener("click", e => {
+    if (!armed) { armed = true; e.currentTarget.textContent = "Tap again to confirm"; document.getElementById("resetMsg").textContent = "This clears lessons learned and quiz scores."; return; }
+    S = { done: {}, last: null, qr: 0, qt: 0 }; save(); gauge(); document.getElementById("resetMsg").textContent = "Progress cleared."; e.currentTarget.textContent = "Reset my progress"; armed = false;
+  });
+}
+
+/* ---------- Router ---------- */
+function route() {
+  const h = (location.hash || "").slice(1);
+  if (h.startsWith("l-")) viewLesson(h.slice(2));
+  else if (h.startsWith("m-")) viewModule(+h.slice(2));
+  else if (h === "threads") viewThreads();
+  else if (h.startsWith("t-")) viewThread(+h.slice(2));
+  else if (h === "quiz") viewQuiz();
+  else if (h === "sources") viewSources();
+  else viewHome();
+  window.scrollTo(0, 0);
+}
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]"); if (g) { e.preventDefault(); go(g.dataset.go); return; }
+  const n = e.target.closest("[data-nav]"); if (n) { go(n.dataset.nav); }
+});
+document.getElementById("brand").addEventListener("click", () => go("home"));
+window.addEventListener("hashchange", route);
+gauge(); route();
+</script>
